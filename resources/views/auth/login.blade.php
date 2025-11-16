@@ -123,7 +123,7 @@
                                     class="form-control @error('password') is-invalid @enderror" 
                                     name="password" 
                                     id="password" 
-                                    placeholder="*********" 
+                                    placeholder="" 
                                     required>
                                 @error('password')
                                     <div class="invalid-feedback">{{ $message }}</div>

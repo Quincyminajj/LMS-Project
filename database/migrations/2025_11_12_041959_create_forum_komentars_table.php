@@ -13,7 +13,7 @@ return new class extends Migration {
             $table->string('pengirim_nisn_nip', 20);
             $table->enum('pengirim_tipe', ['siswa', 'guru']);
             $table->text('isi');
-            $table->foreignId('parent_id')->nullable()->constrained('forum_komentar')->cascadeOnDelete();
+            $table->foreignId('parent_id')->nullable()->constrained('forum_komentars')->cascadeOnDelete();
             $table->timestamp('created_at')->useCurrent();
             $table->index(['pengirim_nisn_nip', 'pengirim_tipe']);
         });
