@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kelas;
 use App\Models\RbGuru;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class KelasController extends Controller
 {
@@ -16,8 +17,19 @@ class KelasController extends Controller
 
     public function create()
     {
-        $guru = RbGuru::all();
-        return view('kelas.create', compact('guru'));
+        // Ambil kelas terakhir
+        $lastKelas = Kelas::orderBy('id', 'desc')->first();
+
+        // Generate kode baru
+        if (!$lastKelas) {
+            $newCode = 'KLS-001';
+        } else {
+            $lastNumber = intval(substr($lastKelas->kode_kelas, 4));
+            $newCode = 'KLS-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        }
+
+        // Kirim ke view
+        return view('kelas.guru.create', compact('newCode'));
     }
 
     public function store(Request $request)
@@ -27,8 +39,13 @@ class KelasController extends Controller
             'nama_kelas' => 'required',
         ]);
 
-        Kelas::create($request->all());
-        return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dibuat.');
+        // Tambahkan guru_nip otomatis dari session
+        $data = $request->only(['kode_kelas', 'nama_kelas', 'deskripsi']);
+        $data['guru_nip'] = session('identifier');
+
+        Kelas::create($data);
+
+        return redirect()->route('dashboard')->with('success', 'Kelas berhasil dibuat.');
     }
 
     public function show(Kelas $kela)

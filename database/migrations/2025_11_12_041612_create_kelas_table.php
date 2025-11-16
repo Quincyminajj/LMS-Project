@@ -9,15 +9,11 @@ return new class extends Migration {
     {
         Schema::create('kelas', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_kelas', 10)->unique();
+            $table->string('kode_kelas')->unique();
             $table->string('nama_kelas');
-            $table->string('guru_nip', 20);
             $table->text('deskripsi')->nullable();
-            $table->enum('status', ['aktif', 'arsip'])->default('aktif');
+            $table->string('guru_nip')->nullable();
             $table->timestamps();
-
-            $table->index('guru_nip');
-            $table->index('kode_kelas');
         });
     }
 

@@ -118,41 +118,35 @@
             </div>
         </div>
 
-        <!-- Kelas Saya -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="fw-semibold mb-0">Kelas Saya</h5>
-            <a href="#" class="btn btn-primary btn-sm"><i class="bi bi-plus-circle me-1"></i>Buat Kelas Baru</a>
-        </div>
+                    <!-- Kelas Saya -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-semibold mb-0">Kelas Saya</h5>
+                        <a href="{{ route('kelas.create') }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-plus-circle me-1"></i>Buat Kelas Baru
+                        </a>
+                    </div>
 
-        <div class="row g-3">
-            <!-- Kelas 1 -->
-            <div class="col-md-4">
-                <div class="card kelas-card p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge kelas-badge">Aktif</span>
-                        <i class="bi bi-gear text-secondary"></i>
-                    </div>
-                    <h6 class="fw-bold mb-1">Matematika Kelas 10</h6>
-                    <p class="text-secondary small mb-2">Pembelajaran Matematika untuk kelas 10 semester genap</p>
-                    <div class="d-flex justify-content-between align-items-center text-secondary small">
-                        <div><i class="bi bi-people me-1"></i>28 siswa</div>
-                        <span class="badge bg-light text-primary">MTK10A</span>
-                    </div>
-                </div>
-            </div>
+                    <div class="row g-3">
+                        @foreach($kelas as $kls)
+                        <div class="col-md-4">
+                            <a href="{{ route('kelas.show', $kls->id) }}" class="text-decoration-none text-dark">
+                                <div class="card kelas-card p-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="badge kelas-badge">Aktif</span>
+                                        <i class="bi bi-gear text-secondary"></i>
+                                    </div>
 
-            <!-- Kelas 2 -->
-            <div class="col-md-4">
-                <div class="card kelas-card p-3">
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <span class="badge kelas-badge">Aktif</span>
-                        <i class="bi bi-gear text-secondary"></i>
-                    </div>
-                    <h6 class="fw-bold mb-1">Fisika Kelas 11</h6>
-                    <p class="text-secondary small mb-2">Pembelajaran Fisika mencakup mekanika dan termodinamika</p>
-                    <div class="d-flex justify-content-between align-items-center text-secondary small">
-                        <div><i class="bi bi-people me-1"></i>25 siswa</div>
-                        <span class="badge bg-light text-primary">FIS11B</span>
+                                    <h6 class="fw-bold mb-1">{{ $kls->nama_kelas }}</h6>
+                                    <p class="text-secondary small mb-2">{{ $kls->deskripsi ?? 'Guru tidak terdaftar' }}</p>
+
+                                    <div class="d-flex justify-content-between align-items-center text-secondary small">
+                                        <div><i class="bi bi-people me-1"></i>-</div>
+                                        <span class="badge bg-light text-primary">{{ $kls->kode_kelas }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
