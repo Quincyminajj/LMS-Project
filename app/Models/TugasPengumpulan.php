@@ -9,7 +9,7 @@ class TugasPengumpulan extends Model
 {
     use HasFactory;
 
-    protected $table = 'tugas_pengumpulans';
+    protected $table = 'tugas_pengumpulan';
 
     protected $fillable = [
         'tugas_id',
@@ -30,9 +30,9 @@ class TugasPengumpulan extends Model
         'dinilai_pada' => 'datetime',
     ];
 
-    // Relasi ke tugas
     public function tugas()
     {
         return $this->belongsTo(Tugas::class);
     }
 }
+

@@ -29,7 +29,8 @@ class ForumKomentarController extends Controller
             'parent_id' => 'nullable|exists:forum_komentars,id',
             'created_at' => 'nullable|date',
         ]);
-
+        
+        $validated['dibuat_oleh'] = auth()->user()->username;
         $komentar = ForumKomentar::create($validated);
         return response()->json($komentar, 201);
     }

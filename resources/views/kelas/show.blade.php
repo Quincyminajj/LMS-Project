@@ -17,22 +17,42 @@
 
         <!-- Tombol Tambah Konten -->
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahKonten">
-            <i class="bi bi-plus-lg"></i> Tambah Konten
+            <i class="bi bi-plus-lg"></i> Buat Konten
         </button>
     </div>
 
     <!-- Tab Navigation -->
     <ul class="nav nav-tabs mb-4">
+        {{-- TAB KONTEN --}}
         <li class="nav-item">
-            <a class="nav-link active">Konten</a>
+            <a 
+                class="nav-link {{ request()->is('kelas/'.$kelas->id) ? 'active' : '' }}"
+                href="{{ url('kelas/'.$kelas->id) }}"
+            >
+                Konten
+            </a>
         </li>
+        {{-- TAB TUGAS --}}
         <li class="nav-item">
-            <a class="nav-link disabled">Tugas</a>
+            <a 
+                class="nav-link {{ request()->is('kelas/'.$kelas->id.'/tugas') ? 'active' : '' }}"
+                href="{{ route('tugas.index', $kelas->id) }}"
+            >
+                Tugas
+            </a>
         </li>
+        {{-- TAB FORUM --}}
         <li class="nav-item">
-            <a class="nav-link disabled">Forum</a>
+            <a 
+                class="nav-link {{ request()->is('kelas/'.$kelas->id.'/forum') ? 'active' : '' }}"
+                href="{{ route('kelas.forum', $kelas->id) }}"
+            >
+                Forum
+            </a>
         </li>
+
     </ul>
+
 
     <!-- Konten List -->
     <div class="row g-3">

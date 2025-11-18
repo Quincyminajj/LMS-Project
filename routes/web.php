@@ -35,10 +35,19 @@ Route::middleware('auth.custom')->group(function () {
     Route::post('/kelas/{id}/konten', [KelasKontenController::class, 'store'])->name('konten.store');
 
     // Tugas CRUD
-    Route::apiResource('tugas', TugasController::class);
-    Route::apiResource('pengumpulan', TugasPengumpulanController::class);
+    Route::get('/kelas/{kelas}/tugas', [TugasController::class, 'index'])->name('tugas.index');
+    Route::get('/tugas/{id}', [TugasController::class, 'showView'])->name('tugas.show');
 
-    // Forum dan Komentar
-    Route::apiResource('forums', ForumController::class);
-    Route::apiResource('komentars', ForumKomentarController::class);
+    Route::post('/tugas', [TugasController::class, 'store'])->name('tugas.store');
+    Route::put('/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update');
+    Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy');
+
+    // Forum
+    Route::get('/kelas/{id}/forum', [ForumController::class, 'index'])->name('kelas.forum');
+    Route::get('/kelas/{kelas_id}/forum/create', [ForumController::class, 'create'])->name('forum.create');
+    Route::post('/forum/store', [ForumController::class, 'store'])->name('forum.store');
+
+    Route::get('/forum/{forum}', [ForumController::class, 'show'])->name('forum.show');
+    Route::post('/forum/{forum}/comment', [ForumController::class, 'comment'])->name('forum.comment');
+
 });

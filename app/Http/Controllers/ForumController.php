@@ -3,13 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Forum;
+use App\Models\Kelas;
 use Illuminate\Http\Request;
 
 class ForumController extends Controller
 {
-    public function index()
+
+    public function index($kelas_id)
     {
-        $forums = Forum::with('komentars')->orderBy('created_at', 'desc')->get();
+        $kelas = Kelas::findOrFail($kelas_id);
+        $forums = Forum::where('kelas_id', $kelas_id)
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
+        return view('forum.index', compact('kelas', 'forums'));
+    }
+
+    public function all()
+    {
+        $forums = Forum::with('komentars')
+                        ->orderBy('created_at', 'desc')
+                        ->get();
+
         return response()->json($forums);
     }
 
@@ -25,13 +40,22 @@ class ForumController extends Controller
             'kelas_id' => 'required|exists:kelas,id',
             'judul' => 'required|string|max:255',
             'isi' => 'required|string',
-            'dibuat_oleh' => 'required|string|max:20',
         ]);
 
+        $validated['dibuat_oleh'] = auth()->user()->guru;
+
         $forum = Forum::create($validated);
-        return response()->json($forum, 201);
+
+        return redirect()->route('kelas.forum', $validated['kelas_id']) ->with('success', 'Forum berhasil dibuat');
     }
 
+
+    public function create($kelas_id)
+    {
+        $kelas = Kelas::findOrFail($kelas_id);
+        return view('forum.create', compact('kelas'));
+    }
+    
     public function update(Request $request, $id)
     {
         $forum = Forum::findOrFail($id);
@@ -51,6 +75,7 @@ class ForumController extends Controller
     {
         $forum = Forum::findOrFail($id);
         $forum->delete();
+
         return response()->json(['message' => 'Forum berhasil dihapus']);
     }
 }

@@ -32,4 +32,14 @@ class Kelas extends Model
     {
         return $this->belongsTo(RbGuru::class, 'guru_nip', 'nip');
     }
+    
+    public function tugas()
+    {
+        return $this->hasMany(Tugas::class, 'kelas_id'); 
+    }
+
+    public function tugasPengumpulan()
+    {
+        return $this->hasMany(TugasPengumpulan::class, 'kelas_id'); 
+    }
 }

@@ -9,10 +9,8 @@ class Tugas extends Model
 {
     use HasFactory;
 
-    
     protected $table = 'tugas';
 
-    
     protected $fillable = [
         'kelas_id',
         'judul',
@@ -23,15 +21,18 @@ class Tugas extends Model
         'created_by',
     ];
 
-    
     protected $casts = [
         'deadline' => 'datetime',
         'nilai_maksimal' => 'decimal:2',
     ];
 
-    
     public function kelas()
     {
         return $this->belongsTo(Kelas::class);
+    }
+
+    public function pengumpulan()
+    {
+        return $this->hasMany(TugasPengumpulan::class);
     }
 }
