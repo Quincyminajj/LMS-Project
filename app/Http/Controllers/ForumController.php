@@ -42,7 +42,7 @@ class ForumController extends Controller
             'isi' => 'required|string',
         ]);
 
-        $validated['dibuat_oleh'] = auth()->user()->guru;
+        $validated['dibuat_oleh'] = session('user_name');
 
         $forum = Forum::create($validated);
 

@@ -111,7 +111,7 @@
   <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content" style="border-radius: 14px;">
       <div class="modal-header">
-        <h4 class="modal-title fw-semibold">Buat Forum Diskusi Baru</h4>
+        <h4 class="modal-title fw-semibold">Buat Forum Diskusi</h4>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
@@ -130,6 +130,8 @@
             <label class="form-label fw-semibold">Deskripsi *</label>
             <textarea name="isi" rows="3" class="form-control" required></textarea>
           </div>
+
+          <div class="alert alert-info small">💡 Siswa dapat berkomentar dan berdiskusi pada forum ini</div>
 
         </div>
 

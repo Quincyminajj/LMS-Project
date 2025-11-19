@@ -11,7 +11,7 @@ class KelasController extends Controller
 {
     public function index()
     {
-        $kelas = Kelas::with('guru')->get();
+        $kelas = Kelas::with('guru')->where('status', '!=', 'Arsip')->get();
         return view('kelas.index', compact('kelas'));
     }
 
@@ -35,18 +35,31 @@ class KelasController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_kelas' => 'required|unique:kelas',
             'nama_kelas' => 'required',
+            'deskripsi'  => 'required',
         ]);
 
-        // Tambahkan guru_nip otomatis dari session
-        $data = $request->only(['kode_kelas', 'nama_kelas', 'deskripsi']);
-        $data['guru_nip'] = session('identifier');
+        // Generate kode kelas otomatis
+        $lastKelas = Kelas::orderBy('id', 'desc')->first();
 
-        Kelas::create($data);
+        if (!$lastKelas) {
+            $newCode = 'KLS-001';
+        } else {
+            $lastNumber = intval(substr($lastKelas->kode_kelas, 4));
+            $newCode = 'KLS-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
+        }
+
+        Kelas::create([
+            'kode_kelas' => $newCode,
+            'nama_kelas' => $request->nama_kelas,
+            'deskripsi'  => $request->deskripsi,
+            'guru_nip'   => session('identifier'),
+            'status'     => 'Aktif'
+        ]);
 
         return redirect()->route('dashboard')->with('success', 'Kelas berhasil dibuat.');
     }
+
 
     public function show(Kelas $kela)
     {
@@ -65,9 +78,26 @@ class KelasController extends Controller
         return redirect()->route('kelas.index')->with('success', 'Kelas berhasil diperbarui.');
     }
 
-    public function destroy(Kelas $kela)
+    public function archive($id)
     {
-        $kela->delete();
-        return redirect()->route('kelas.index')->with('success', 'Kelas berhasil dihapus.');
+        $kelas = Kelas::findOrFail($id);
+        $kelas->status = 'Arsip';
+        $kelas->save();
+
+        return back()->with('success', 'Kelas berhasil diarsipkan.');
+    }
+
+    public function restore($id)
+    {
+        $kelas = Kelas::findOrFail($id);
+        $kelas->update(['status' => 'Aktif']);
+
+        return redirect()->route('kelas.arsip')->with('success', 'Kelas berhasil dipulihkan!');
+    }
+
+    public function destroy($id)
+    {
+        Kelas::findOrFail($id)->delete();
+        return back()->with('success', 'Kelas berhasil dihapus.');
     }
 }

@@ -44,7 +44,7 @@
     </ul>
 
 
-    <!-- LIST TUGAS (CARD MIRIP KONTEN STYLE) -->
+    <!-- LIST TUGAS -->
     <div class="row g-3">
         @forelse ($tugas as $t)
         <div class="col-md-4">
@@ -66,6 +66,7 @@
 
                     <div>
                         <!-- EDIT -->
+                         <form action="{{ route('tugas.update', ['kelas' => $kelas->id, 'id' => $t->id]) }}" method="POST">
                         <button class="btn btn-warning btn-sm"
                             data-bs-toggle="modal"
                             data-bs-target="#modalEditTugas{{ $t->id }}">
@@ -73,8 +74,7 @@
                         </button>
 
                         <!-- DELETE -->
-                        <form action="{{ route('tugas.delete', [$kelas->id, $t->id]) }}" 
-                              method="POST" class="d-inline">
+                        <form action="{{ route('tugas.destroy', ['kelas' => $kelas->id, 'id' => $t->id]) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-danger btn-sm"
@@ -164,7 +164,7 @@
         <div class="modal-body">
 
           <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
-          <input type="hidden" name="created_by" value="{{ auth()->user()->username ?? 'guru' }}">
+          <input type="hidden" name="created_by" value="{{ session('identifier') }}">
 
           <div class="mb-3">
             <label class="form-label fw-semibold">Judul Tugas *</label>

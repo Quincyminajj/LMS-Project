@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LMS Dashboard</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <style>
         body {
@@ -59,13 +61,16 @@
         }
     </style>
 </head>
+
 <body>
+
     <!-- Header -->
     <div class="header d-flex justify-content-between align-items-center">
         <div>
             <h5 class="mb-0 fw-bold text-primary"><i class="bi bi-book me-2"></i>LMS Dashboard</h5>
             <small class="text-secondary">Portal {{ ucfirst(session('role')) }}</small>
         </div>
+
         <div class="d-flex align-items-center gap-3">
             <div class="text-end">
                 <strong>{{ session('user_name') }}</strong><br>
@@ -78,22 +83,23 @@
         </div>
     </div>
 
-    <!-- Main -->
+    <!-- Main Content -->
     <div class="container py-4">
         <h4 class="fw-semibold mb-2">Selamat Datang, {{ session('user_name') }}!</h4>
         <p class="text-secondary mb-4">Kelola kelas dan materi pembelajaran Anda</p>
 
-        <!-- Summary Cards -->
+        <!-- Summary Widgets -->
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="summary-card">
                     <div>
                         <div class="summary-title">Total Kelas Aktif</div>
-                        <div class="summary-value">2</div>
+                        <div class="summary-value">{{ $kelasAktif }}</div>
                     </div>
                     <div class="summary-icon"><i class="bi bi-journal-bookmark"></i></div>
                 </div>
             </div>
+
             <div class="col-md-4">
                 <div class="summary-card">
                     <div>
@@ -105,11 +111,14 @@
                     </div>
                 </div>
             </div>
+
             <div class="col-md-4">
                 <div class="summary-card">
                     <div>
-                        <div class="summary-title">Kelas Diarsipkan</div>
-                        <div class="summary-value">0</div>
+                        <a href="{{ route('kelas.arsip') }}" class="text-decoration-none">
+                            <div class="summary-title">Kelas Diarsipkan</div>
+                            <div class="summary-value">{{ $kelasArsip }}</div>
+                        </a>
                     </div>
                     <div class="summary-icon" style="background-color: #fef3c7; color: #d97706;">
                         <i class="bi bi-archive"></i>
@@ -118,37 +127,102 @@
             </div>
         </div>
 
-                    <!-- Kelas Saya -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h5 class="fw-semibold mb-0">Kelas Saya</h5>
-                        <a href="{{ route('kelas.create') }}" class="btn btn-primary btn-sm">
-                            <i class="bi bi-plus-circle me-1"></i>Buat Kelas Baru
-                        </a>
-                    </div>
+        <!-- Kelas Saya Header -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-semibold mb-0">Kelas Saya</h5>
+            <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalCreateKelas">
+                <i class="bi bi-plus-circle me-1"></i>Buat Kelas Baru
+            </button>
+        </div>
 
-                    <div class="row g-3">
-                        @foreach($kelas as $kls)
-                        <div class="col-md-4">
-                            <a href="{{ route('kelas.show', $kls->id) }}" class="text-decoration-none text-dark">
-                                <div class="card kelas-card p-3">
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="badge kelas-badge">Aktif</span>
-                                        <i class="bi bi-gear text-secondary"></i>
-                                    </div>
+        <!-- List Kelas -->
+        <div class="row g-3">
+            @foreach($kelas as $kls)
+            <div class="col-md-4">
+                <div class="card kelas-card p-3">
 
-                                    <h6 class="fw-bold mb-1">{{ $kls->nama_kelas }}</h6>
-                                    <p class="text-secondary small mb-2">{{ $kls->deskripsi ?? 'Guru tidak terdaftar' }}</p>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge kelas-badge">{{ $kls->status ?? 'Aktif' }}</span>
 
-                                    <div class="d-flex justify-content-between align-items-center text-secondary small">
-                                        <div><i class="bi bi-people me-1"></i>-</div>
-                                        <span class="badge bg-light text-primary">{{ $kls->kode_kelas }}</span>
-                                    </div>
-                                </div>
-                            </a>
+                        <div class="dropdown">
+                            <i class="bi bi-gear text-secondary" role="button" data-bs-toggle="dropdown"></i>
+                            <ul class="dropdown-menu dropdown-menu-end">
+
+                                <li>
+                                    <form action="{{ route('kelas.archive', $kls->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item">
+                                            <i class="bi bi-archive me-2"></i> Arsipkan Kelas
+                                        </button>
+                                    </form>
+                                </li>
+
+                                <li><hr class="dropdown-divider"></li>
+
+                                <li>
+                                    <form action="{{ route('kelas.destroy', $kls->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus kelas ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="dropdown-item text-danger">
+                                            <i class="bi bi-trash me-2"></i> Hapus Kelas
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </div>
-                        @endforeach
                     </div>
+
+                    <a href="{{ route('kelas.show', $kls->id) }}" class="text-decoration-none text-dark">
+                        <h6 class="fw-bold mb-1">{{ $kls->nama_kelas }}</h6>
+                        <p class="text-secondary small mb-2">{{ $kls->deskripsi ?? 'Tidak ada deskripsi' }}</p>
+
+                        <div class="d-flex justify-content-between align-items-center text-secondary small">
+                            <div><i class="bi bi-people me-1"></i>-</div>
+                            <span class="badge bg-light text-primary">{{ $kls->kode_kelas }}</span>
+                        </div>
+                    </a>
+
                 </div>
+            </div>
+            @endforeach
+        </div>
+
+    </div>
+
+    <!-- MODAL CREATE KELAS -->
+    <div class="modal fade" id="modalCreateKelas" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content p-3" style="border-radius: 18px;">
+
+                <div class="modal-header border-0">
+                    <h5 class="modal-title fw-bold">Buat Kelas Baru</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+                    <form action="{{ route('kelas.store') }}" method="POST">
+                        @csrf
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Nama Kelas *</label>
+                            <input type="text" name="nama_kelas" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Deskripsi *</label>
+                            <textarea name="deskripsi" class="form-control" required></textarea>
+                        </div>
+
+                        <div class="alert alert-info small">💡 Kode kelas akan digenerate otomatis dan dapat dibagikan kepada siswa untuk bergabung.</div>
+
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                            <button type="submit" class="btn btn-primary">Buat Kelas</button>
+                        </div>
+
+                    </form>
+                </div>
+
             </div>
         </div>
     </div>
