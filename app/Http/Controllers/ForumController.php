@@ -11,10 +11,11 @@ class ForumController extends Controller
 
     public function index($kelas_id)
     {
-        $kelas = Kelas::findOrFail($kelas_id);
+        $kelas = Kelas::with('guru')->findOrFail($kelas_id);
         $forums = Forum::where('kelas_id', $kelas_id)
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+            ->with('komentars')
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('forum.index', compact('kelas', 'forums'));
     }
@@ -22,16 +23,16 @@ class ForumController extends Controller
     public function all()
     {
         $forums = Forum::with('komentars')
-                        ->orderBy('created_at', 'desc')
-                        ->get();
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return response()->json($forums);
     }
 
     public function show($id)
     {
-        $forum = Forum::with('komentars')->findOrFail($id);
-        return response()->json($forum);
+        $forum = Forum::with(['komentars', 'kelas'])->findOrFail($id);
+        return view('forum.show', compact('forum'));
     }
 
     public function store(Request $request)
@@ -42,40 +43,40 @@ class ForumController extends Controller
             'isi' => 'required|string',
         ]);
 
-        $validated['dibuat_oleh'] = session('user_name');
+        // Ambil nama user dari session
+        $validated['dibuat_oleh'] = session('user_name') ?? session('identifier');
 
         $forum = Forum::create($validated);
 
-        return redirect()->route('kelas.forum', $validated['kelas_id']) ->with('success', 'Forum berhasil dibuat');
+        return redirect()->route('kelas.forum', $validated['kelas_id'])->with('success', 'Forum berhasil dibuat');
     }
-
 
     public function create($kelas_id)
     {
         $kelas = Kelas::findOrFail($kelas_id);
         return view('forum.create', compact('kelas'));
     }
-    
+
     public function update(Request $request, $id)
     {
         $forum = Forum::findOrFail($id);
 
         $validated = $request->validate([
-            'kelas_id' => 'sometimes|exists:kelas,id',
-            'judul' => 'sometimes|string|max:255',
-            'isi' => 'sometimes|string',
-            'dibuat_oleh' => 'sometimes|string|max:20',
+            'judul' => 'required|string|max:255',
+            'isi' => 'required|string',
         ]);
 
         $forum->update($validated);
-        return response()->json($forum);
+
+        return redirect()->route('forum.show', $id)->with('success', 'Forum berhasil diperbarui');
     }
 
     public function destroy($id)
     {
         $forum = Forum::findOrFail($id);
+        $kelas_id = $forum->kelas_id;
         $forum->delete();
 
-        return response()->json(['message' => 'Forum berhasil dihapus']);
+        return redirect()->route('kelas.forum', $kelas_id)->with('success', 'Forum berhasil dihapus');
     }
 }

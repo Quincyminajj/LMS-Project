@@ -11,19 +11,20 @@ class ForumKomentar extends Model
 
     protected $table = 'forum_komentars';
 
-    public $timestamps = false; // Karena created_at sudah di-handle manual
+    public $timestamps = true; // Aktifkan timestamps untuk created_at dan updated_at
 
     protected $fillable = [
         'forum_id',
         'pengirim_nisn_nip',
         'pengirim_tipe',
         'isi',
+        'dibuat_oleh', // Tambahkan field ini untuk menyimpan nama user
         'parent_id',
-        'created_at',
     ];
 
     protected $casts = [
         'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
     // Relasi ke forum

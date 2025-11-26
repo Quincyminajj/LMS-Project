@@ -1,148 +1,112 @@
 @extends('layouts.app')
 
-@section('title', $kelas->nama_kelas.' — Forum')
+@section('title', 'Forum - ' . $kelas->nama_kelas)
 
 @section('content')
-<div class="container py-4">
+    <div class="container py-4">
 
-    <!-- HEADER KELAS (SAMA DENGAN TUGAS) -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h3 class="fw-bold mb-1">{{ $kelas->nama_kelas }}</h3>
-            <p class="text-secondary mb-1">{{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }}</p>
-            <span class="badge bg-primary">{{ $kelas->kode_kelas }}</span>
-        </div>
-
-        <!-- BUTTON BUAT FORUM (MODAL SAMA SEPERTI TUGAS) -->
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalBuatForum">
-            <i class="bi bi-plus-lg"></i> Buat Forum
-        </button>
-    </div>
-
-    <!-- NAV TAB -->
-    <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-            <a class="nav-link" href="{{ url('kelas/'.$kelas->id) }}">Konten</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('tugas.index', $kelas->id) }}">Tugas</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active">Forum</a>
-        </li>
-    </ul>
-
-    <!-- SPLIT LAYOUT -->
-    <div class="row g-3">
-
-        <!-- LIST FORUM (SEBELAH KIRI) -->
-        <div class="col-md-4">
-            <div class="list-group shadow-sm">
-
-                @forelse ($forums as $f)
-                <a href="{{ route('forum.show', [$kelas->id, $f->id]) }}"
-                    class="list-group-item list-group-item-action py-3
-                    {{ isset($forum) && $forum->id == $f->id ? 'active text-white' : '' }}"
-                    style="border-radius: 10px;">
-
-                    <h6 class="fw-bold mb-1">{{ $f->judul }}</h6>
-                    <small class="d-block">{{ Str::limit($f->isi, 70) }}</small>
-                    <small class="text-muted">Oleh: {{ $f->dibuat_oleh ?? 'Unknown' }}</small>
-
-                </a>
-                @empty
-                    <p class="text-center text-secondary mt-3 p-3">Belum ada forum.</p>
-                @endforelse
-
+        <!-- Header Kelas -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none text-secondary mb-2 d-inline-block">
+                            <i class="bi bi-arrow-left"></i> Kembali
+                        </a>
+                        <h3 class="fw-bold mb-2">{{ $kelas->nama_kelas }}</h3>
+                        <p class="text-secondary mb-0">{{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }} • Kode:
+                            {{ $kelas->kode_kelas }}</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- DETAIL FORUM (SEBELAH KANAN) -->
-        <div class="col-md-8">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('kelas.show', $kelas->id) }}">
+                    <i class="bi bi-book"></i> Konten
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('tugas.index', $kelas->id) }}">
+                    <i class="bi bi-clipboard-check"></i> Tugas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="{{ route('kelas.forum', $kelas->id) }}">
+                    <i class="bi bi-chat-dots"></i> Forum
+                </a>
+            </li>
+        </ul>
 
-            @if(!isset($forum))
-                <div class="card p-4 text-center shadow-sm" style="border-radius: 14px;">
-                    <p class="text-secondary">Pilih forum untuk melihat diskusi.</p>
-                </div>
-            @else
-                <div class="card p-4 shadow-sm" style="border-radius: 14px;">
+        <!-- Header Forum -->
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="mb-0">Diskusi Forum</h5>
+            <a href="{{ route('forum.create', $kelas->id) }}" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Buat Diskusi
+            </a>
+        </div>
 
-                    <h4 class="fw-bold">{{ $forum->judul }}</h4>
-                    <p class="text-secondary">{{ $forum->isi }}</p>
+        <!-- List Forum -->
+        <div class="row g-3">
+            @php
+                $forums = App\Models\Forum::where('kelas_id', $kelas->id)->orderBy('created_at', 'desc')->get();
+            @endphp
 
-                    <small class="text-muted">
-                        Dibuat oleh {{ $forum->dibuat_oleh }} • {{ $forum->created_at->format('d M Y') }}
-                    </small>
+            @forelse($forums as $forum)
+                <div class="col-12">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div class="flex-grow-1">
+                                    <h6 class="fw-bold mb-1">{{ $forum->judul }}</h6>
+                                    <p class="text-secondary mb-2">{{ Str::limit($forum->isi, 150) }}</p>
+                                    <small class="text-muted">
+                                        <i class="bi bi-person-circle"></i> {{ $forum->dibuat_oleh }} •
+                                        <i class="bi bi-clock"></i> {{ $forum->created_at->diffForHumans() }} •
+                                        <i class="bi bi-chat"></i> {{ $forum->komentars->count() }} komentar
+                                    </small>
+                                </div>
 
-                    <hr>
+                                @if (session('role') === 'guru' && session('identifier') === $kelas->guru_nip)
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                                            <i class="bi bi-three-dots-vertical"></i>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li>
+                                                <form action="{{ route('forum-komentar.destroy', $forum->id) }}"
+                                                    method="POST"
+                                                    onsubmit="return confirm('Yakin ingin menghapus diskusi ini?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="dropdown-item text-danger">Hapus</button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                @endif
+                            </div>
 
-                    <!-- KOMENTAR -->
-                    @foreach ($forum->komentars as $k)
-                        <div class="p-3 mb-3 rounded {{ $k->role == 'guru' ? 'bg-light border-start border-3 border-primary' : 'bg-light' }}">
-                            <strong>{{ $k->nama }}</strong>
-                            <span class="badge bg-secondary ms-2">{{ ucfirst($k->role) }}</span>
-                            <small class="text-muted ms-2">{{ $k->created_at->format('d/m/Y') }}</small>
-                            <p class="mt-2 mb-0">{{ $k->komentar }}</p>
+                            <a href="{{ route('forum.show', $forum->id) }}" class="btn btn-outline-primary btn-sm">
+                                <i class="bi bi-eye"></i> Lihat Diskusi
+                            </a>
                         </div>
-                    @endforeach
-
-                    <hr>
-
-                    <!-- FORM KOMENTAR -->
-                    <form action="{{ route('forum.comment', [$kelas->id, $forum->id]) }}" method="POST">
-                        @csrf
-                        <textarea name="komentar" rows="3" class="form-control mb-3" placeholder="Tulis komentar..." required></textarea>
-                        <button class="btn btn-primary px-4">Kirim Komentar</button>
-                    </form>
-
+                    </div>
                 </div>
-            @endif
 
+            @empty
+                <div class="col-12">
+                    <div class="text-center py-5">
+                        <i class="bi bi-chat-square-text fs-1 text-muted"></i>
+                        <p class="text-secondary mt-3">Belum ada diskusi forum</p>
+                        <a href="{{ route('forum.create', $kelas->id) }}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-lg"></i> Mulai Diskusi Pertama
+                        </a>
+                    </div>
+                </div>
+            @endforelse
         </div>
 
     </div>
-</div>
-
-
-<!-- =============================
-     MODAL BUAT FORUM
-============================= -->
-<div class="modal fade" id="modalBuatForum" tabindex="-1">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content" style="border-radius: 14px;">
-      <div class="modal-header">
-        <h4 class="modal-title fw-semibold">Buat Forum Diskusi</h4>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-
-      <form action="{{ route('forum.store') }}" method="POST">
-        @csrf
-
-        <div class="modal-body">
-          <input type="hidden" name="kelas_id" value="{{ $kelas->id }}">
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Judul Forum *</label>
-            <input type="text" name="judul" class="form-control form-control-lg" required>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Deskripsi *</label>
-            <textarea name="isi" rows="3" class="form-control" required></textarea>
-          </div>
-
-          <div class="alert alert-info small">💡 Siswa dapat berkomentar dan berdiskusi pada forum ini</div>
-
-        </div>
-
-        <div class="modal-footer">
-          <button class="btn btn-light" data-bs-dismiss="modal">Batal</button>
-          <button class="btn btn-primary">Buat Forum</button>
-        </div>
-
-      </form>
-    </div>
-  </div>
-</div>
-
 @endsection

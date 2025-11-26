@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\TugasPengumpulan;
+use App\Models\Tugas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TugasPengumpulanController extends Controller
 {
@@ -12,8 +14,8 @@ class TugasPengumpulanController extends Controller
      */
     public function index()
     {
-        $pengumpulans = TugasPengumpulan::with(['tugas.kelas'])
-            ->orderBy('dikumpul_pada', 'desc')
+        $pengumpulans = TugasPengumpulan::with(['tugas.kelas', 'siswa'])
+            ->orderBy('created_at', 'desc')
             ->get();
 
         return response()->json($pengumpulans);
@@ -24,74 +26,75 @@ class TugasPengumpulanController extends Controller
      */
     public function show($id)
     {
-        $pengumpulan = TugasPengumpulan::with(['tugas.kelas'])
+        $pengumpulan = TugasPengumpulan::with(['tugas.kelas', 'siswa'])
             ->findOrFail($id);
 
         return response()->json($pengumpulan);
     }
 
     /**
-     * Menyimpan pengumpulan tugas
+     * Siswa submit/kumpulkan tugas
      */
-    public function store(Request $request)
+    public function store(Request $request, $tugas_id = null)
     {
+        // Jika tugas_id dari route parameter
+        if ($tugas_id) {
+            $request->merge(['tugas_id' => $tugas_id]);
+        }
+
         $validated = $request->validate([
-            'tugas_id'      => 'required|exists:tugas,id',
-            'siswa_nisn'    => 'required|string|max:20',
-            'tipe'          => 'required|in:file,link,teks',
-            'isi'           => 'nullable|string',
-            'file_path'     => 'nullable|string|max:255',
-            'nilai'         => 'nullable|numeric|min:0',
-            'feedback'      => 'nullable|string',
-            'dinilai_oleh'  => 'nullable|string|max:20',
-            'dikumpul_pada' => 'nullable|date',
-            'dinilai_pada'  => 'nullable|date',
+            'tugas_id' => 'required|exists:tugas,id',
+            'jawaban' => 'required|string',
+            'file_path' => 'nullable|file|max:5120', // Max 5MB
         ]);
 
-        // Pastikan siswa belum mengumpulkan tugas tersebut
-        if (
-            TugasPengumpulan::where('tugas_id', $validated['tugas_id'])
-                ->where('siswa_nisn', $validated['siswa_nisn'])
-                ->exists()
-        ) {
-            return response()->json([
-                'error' => 'Pengumpulan untuk siswa ini sudah ada.'
-            ], 409);
+        // Cek apakah siswa sudah mengumpulkan
+        $existingPengumpulan = TugasPengumpulan::where('tugas_id', $validated['tugas_id'])
+            ->where('siswa_nisn', session('identifier'))  // ✅ PERBAIKI: Ubah dari siswa_nis ke siswa_nisn
+            ->first();
+
+        if ($existingPengumpulan) {
+            return redirect()->back()->with('error', 'Anda sudah mengumpulkan tugas ini sebelumnya!');
         }
 
-        // Jika tidak diisi → otomatis ambil now()
-        if (empty($validated['dikumpul_pada'])) {
-            $validated['dikumpul_pada'] = now();
+        // Upload file jika ada
+        if ($request->hasFile('file_path')) {
+            $validated['file_path'] = $request->file('file_path')->store('pengumpulan_tugas', 'public');
         }
 
-        $pengumpulan = TugasPengumpulan::create($validated);
+        // Simpan data pengumpulan
+        TugasPengumpulan::create([
+            'tugas_id' => $validated['tugas_id'],
+            'siswa_nisn' => session('identifier'),  // ✅ PERBAIKI: Ubah dari siswa_nis ke siswa_nisn
+            'jawaban' => $validated['jawaban'],
+            'file_path' => $validated['file_path'] ?? null,
+        ]);
 
-        return response()->json($pengumpulan, 201);
+        return redirect()->route('tugas.show', $validated['tugas_id'])
+            ->with('success', 'Tugas berhasil dikumpulkan!');
     }
 
     /**
-     * Update data pengumpulan
+     * Guru memberi nilai
      */
     public function update(Request $request, $id)
     {
         $pengumpulan = TugasPengumpulan::findOrFail($id);
 
         $validated = $request->validate([
-            'tugas_id'      => 'sometimes|exists:tugas,id',
-            'siswa_nisn'    => 'sometimes|string|max:20',
-            'tipe'          => 'sometimes|in:file,link,teks',
-            'isi'           => 'nullable|string',
-            'file_path'     => 'nullable|string|max:255',
-            'nilai'         => 'nullable|numeric|min:0',
-            'feedback'      => 'nullable|string',
-            'dinilai_oleh'  => 'sometimes|string|max:20',
-            'dikumpul_pada' => 'nullable|date',
-            'dinilai_pada'  => 'nullable|date',
+            'nilai' => 'required|numeric|min:0',
+            'catatan_guru' => 'nullable|string',
         ]);
 
-        $pengumpulan->update($validated);
+        // Update nilai dan catatan
+        $pengumpulan->update([
+            'nilai' => $validated['nilai'],
+            'catatan_guru' => $validated['catatan_guru'] ?? null,
+            'dinilai_oleh' => session('identifier'), // NIP guru
+        ]);
 
-        return response()->json($pengumpulan);
+        return redirect()->route('tugas.show', $pengumpulan->tugas_id)
+            ->with('success', 'Nilai berhasil disimpan!');
     }
 
     /**
@@ -100,8 +103,16 @@ class TugasPengumpulanController extends Controller
     public function destroy($id)
     {
         $pengumpulan = TugasPengumpulan::findOrFail($id);
+
+        // Hapus file jika ada
+        if ($pengumpulan->file_path) {
+            Storage::disk('public')->delete($pengumpulan->file_path);
+        }
+
+        $tugas_id = $pengumpulan->tugas_id;
         $pengumpulan->delete();
 
-        return response()->json(['message' => 'Pengumpulan berhasil dihapus']);
+        return redirect()->route('tugas.show', $tugas_id)
+            ->with('success', 'Pengumpulan berhasil dihapus');
     }
 }

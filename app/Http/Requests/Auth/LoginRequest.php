@@ -37,6 +37,7 @@ class LoginRequest extends FormRequest
                 'identifier' => $guru->nip,
                 'user_name'  => $guru->nama_guru,
                 'role'       => 'guru',
+                'user_role'  => 'guru', // Tambahkan ini untuk konsistensi
             ]);
             RateLimiter::clear($this->throttleKey());
             return;
@@ -49,6 +50,7 @@ class LoginRequest extends FormRequest
                 'identifier' => $siswa->nisn,
                 'user_name'  => $siswa->nama,
                 'role'       => 'siswa',
+                'user_role'  => 'siswa', // Tambahkan ini untuk konsistensi
             ]);
             RateLimiter::clear($this->throttleKey());
             return;
@@ -79,6 +81,6 @@ class LoginRequest extends FormRequest
 
     public function throttleKey(): string
     {
-        return Str::lower($this->nip).'|'.$this->ip();
+        return Str::lower($this->nip) . '|' . $this->ip();
     }
 }

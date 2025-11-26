@@ -9,19 +9,16 @@ class TugasPengumpulan extends Model
 {
     use HasFactory;
 
-    protected $table = 'tugas_pengumpulan';
+    protected $table = 'tugas_pengumpulans';
 
     protected $fillable = [
         'tugas_id',
-        'siswa_nisn',
-        'tipe',
-        'isi',
+        'siswa_nisn',       // ✅
+        'jawaban',
         'file_path',
         'nilai',
-        'feedback',
+        'catatan_guru',     // ✅
         'dinilai_oleh',
-        'dikumpul_pada',
-        'dinilai_pada',
     ];
 
     protected $casts = [
@@ -30,9 +27,21 @@ class TugasPengumpulan extends Model
         'dinilai_pada' => 'datetime',
     ];
 
+    // Relasi ke tugas
     public function tugas()
     {
         return $this->belongsTo(Tugas::class);
     }
-}
 
+    // Relasi ke siswa
+    public function siswa()
+    {
+        return $this->belongsTo(\App\Models\RbSiswa::class, 'siswa_nisn', 'nisn');  // ← PERBAIKI INI!
+    }
+
+    // Relasi ke guru yang menilai
+    public function guru()
+    {
+        return $this->belongsTo(\App\Models\RbGuru::class, 'dinilai_oleh', 'nip');
+    }
+}

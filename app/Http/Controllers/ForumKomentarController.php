@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ForumKomentar;
+use App\Models\Forum;
 use Illuminate\Http\Request;
 
 class ForumKomentarController extends Controller
@@ -23,34 +24,51 @@ class ForumKomentarController extends Controller
     {
         $validated = $request->validate([
             'forum_id' => 'required|exists:forums,id',
-            'pengirim_nisn_nip' => 'required|string|max:20',
-            'pengirim_tipe' => 'required|in:siswa,guru',
             'isi' => 'required|string',
             'parent_id' => 'nullable|exists:forum_komentars,id',
-            'created_at' => 'nullable|date',
         ]);
-        
-        $validated['dibuat_oleh'] = auth()->user()->username;
+
+        // Ambil nama user dari session
+        $validated['dibuat_oleh'] = session('user_name') ?? session('identifier');
+        $validated['pengirim_nisn_nip'] = session('identifier');
+        $validated['pengirim_tipe'] = session('role'); // 'guru' atau 'siswa'
+
         $komentar = ForumKomentar::create($validated);
-        return response()->json($komentar, 201);
+
+        // Redirect kembali ke forum detail
+        return redirect()->route('forum.show', $validated['forum_id'])->with('success', 'Komentar berhasil ditambahkan');
     }
 
     public function update(Request $request, $id)
     {
         $komentar = ForumKomentar::findOrFail($id);
 
+        // Cek apakah user adalah pemilik komentar
+        if ($komentar->pengirim_nisn_nip !== session('identifier')) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk mengedit komentar ini');
+        }
+
         $validated = $request->validate([
-            'isi' => 'sometimes|string',
+            'isi' => 'required|string',
         ]);
 
         $komentar->update($validated);
-        return response()->json($komentar);
+
+        return redirect()->route('forum.show', $komentar->forum_id)->with('success', 'Komentar berhasil diperbarui');
     }
 
     public function destroy($id)
     {
         $komentar = ForumKomentar::findOrFail($id);
+
+        // Cek apakah user adalah pemilik komentar atau guru
+        if ($komentar->pengirim_nisn_nip !== session('identifier') && session('role') !== 'guru') {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk menghapus komentar ini');
+        }
+
+        $forum_id = $komentar->forum_id;
         $komentar->delete();
-        return response()->json(['message' => 'Komentar berhasil dihapus']);
+
+        return redirect()->route('forum.show', $forum_id)->with('success', 'Komentar berhasil dihapus');
     }
 }
