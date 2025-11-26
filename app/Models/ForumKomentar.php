@@ -2,45 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ForumKomentar extends Model
 {
-    use HasFactory;
-
     protected $table = 'forum_komentars';
 
-    public $timestamps = true; // Aktifkan timestamps untuk created_at dan updated_at
+    // ✅ Timestamps AKTIF (default Laravel)
+    public $timestamps = true;
 
     protected $fillable = [
         'forum_id',
-        'pengirim_nisn_nip',
-        'pengirim_tipe',
         'isi',
-        'dibuat_oleh', // Tambahkan field ini untuk menyimpan nama user
-        'parent_id',
+        'dibuat_oleh',
+        'pengirim_nisn_nip',
+        'parent_id'
     ];
 
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-
-    // Relasi ke forum
+    // Relasi
     public function forum()
     {
-        return $this->belongsTo(Forum::class);
+        return $this->belongsTo(Forum::class, 'forum_id');
     }
 
-    // Relasi ke parent komentar (jika reply)
     public function parent()
     {
         return $this->belongsTo(ForumKomentar::class, 'parent_id');
     }
 
-    // Relasi ke child komentar (reply)
-    public function children()
+    public function replies()
     {
         return $this->hasMany(ForumKomentar::class, 'parent_id');
     }

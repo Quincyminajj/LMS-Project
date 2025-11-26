@@ -72,23 +72,30 @@ class KelasController extends Controller
     /**
      * Tampilkan detail kelas
      */
-    public function show(Kelas $kela)
+    public function show($id)
     {
-        // Load relasi yang diperlukan
-        $kelas = $kela->load(['guru', 'konten', 'tugas', 'anggota']);
+        $kelas = Kelas::with(['guru', 'konten', 'tugas', 'anggota'])->findOrFail($id);
 
-        // Cek apakah user adalah guru atau siswa yang terdaftar
         $userRole = session('role');
         $identifier = session('identifier');
 
+        // GURU
         if ($userRole === 'guru' && $kelas->guru_nip === $identifier) {
-            return view('kelas.guru.show', compact('kelas'));
-        } elseif ($userRole === 'siswa') {
-            // Cek apakah siswa terdaftar di kelas ini
+            return view('kelas.guru.show', compact('kelas'));  // ✅ View Bootstrap
+        }
+
+        // SISWA
+        if ($userRole === 'siswa') {
             $isMember = $kelas->anggota()->where('siswa_nisn', $identifier)->exists();
 
             if ($isMember) {
-                return view('kelas.siswa.show', compact('kelas'));
+                // Ambil tugas yang sudah dikumpulkan
+                $tugasDikumpulkan = \App\Models\TugasPengumpulan::where('siswa_nisn', $identifier)
+                    ->whereIn('tugas_id', $kelas->tugas->pluck('id'))
+                    ->pluck('tugas_id')
+                    ->toArray();
+
+                return view('kelas.siswa.show', compact('kelas', 'tugasDikumpulkan'));  // ✅ View Tailwind
             }
         }
 
@@ -98,24 +105,28 @@ class KelasController extends Controller
     /**
      * Form edit kelas
      */
-    public function edit(Kelas $kela)
+    public function edit($id)  // ✅ DIPERBAIKI
     {
+        $kelas = Kelas::findOrFail($id);
+
         // Pastikan hanya guru yang bersangkutan yang bisa edit
-        if ($kela->guru_nip !== session('identifier')) {
+        if ($kelas->guru_nip !== session('identifier')) {
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses.');
         }
 
         $guru = RbGuru::all();
-        return view('kelas.edit', compact('kela', 'guru'));
+        return view('kelas.edit', compact('kelas', 'guru'));
     }
 
     /**
      * Update kelas
      */
-    public function update(Request $request, Kelas $kela)
+    public function update(Request $request, $id)  // ✅ DIPERBAIKI
     {
+        $kelas = Kelas::findOrFail($id);
+
         // Pastikan hanya guru yang bersangkutan yang bisa update
-        if ($kela->guru_nip !== session('identifier')) {
+        if ($kelas->guru_nip !== session('identifier')) {
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses.');
         }
 
@@ -124,7 +135,7 @@ class KelasController extends Controller
             'deskripsi'  => 'nullable|string',
         ]);
 
-        $kela->update([
+        $kelas->update([
             'nama_kelas' => $request->nama_kelas,
             'deskripsi'  => $request->deskripsi,
         ]);
@@ -193,7 +204,6 @@ class KelasController extends Controller
 
     /**
      * Hapus kelas permanen
-     * FIXED: Redirect ke dashboard bukan back()
      */
     public function destroy($id)
     {
@@ -211,8 +221,7 @@ class KelasController extends Controller
             // Hapus kelas (akan cascade delete semua data terkait)
             $kelas->delete();
 
-            // PERBAIKAN: Redirect ke dashboard atau arsip (tergantung dari mana hapus dipanggil)
-            // Jika dari arsip, redirect ke arsip. Jika dari detail kelas, redirect ke dashboard
+            // Redirect berdasarkan referer
             if (request()->header('referer') && strpos(request()->header('referer'), 'kelas-arsip') !== false) {
                 return redirect()->route('kelas.arsip')->with('success', "Kelas '{$namaKelas}' berhasil dihapus permanen!");
             }

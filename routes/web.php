@@ -46,9 +46,9 @@ Route::middleware('auth.custom')->group(function () {
     Route::get('/kelas', [KelasController::class, 'index'])->name('kelas.index');
     Route::get('/kelas/create', [KelasController::class, 'create'])->name('kelas.create');
     Route::post('/kelas', [KelasController::class, 'store'])->name('kelas.store');
-    Route::get('/kelas/{kela}', [KelasController::class, 'show'])->name('kelas.show');
-    Route::get('/kelas/{kela}/edit', [KelasController::class, 'edit'])->name('kelas.edit');
-    Route::put('/kelas/{kela}', [KelasController::class, 'update'])->name('kelas.update');
+    Route::get('/kelas/{id}', [KelasController::class, 'show'])->name('kelas.show'); // ✅ DIPERBAIKI
+    Route::get('/kelas/{id}/edit', [KelasController::class, 'edit'])->name('kelas.edit'); // ✅ DIPERBAIKI
+    Route::put('/kelas/{id}', [KelasController::class, 'update'])->name('kelas.update'); // ✅ DIPERBAIKI
     Route::delete('/kelas/{id}', [KelasController::class, 'destroy'])->name('kelas.destroy');
 
     // Kelas Arsip (Guru Only)
@@ -60,8 +60,8 @@ Route::middleware('auth.custom')->group(function () {
     // KELAS KONTEN ROUTES (Guru Only)
     // ------------------------------------------------------------------------
     Route::post('/kelas/{id}/konten', [KelasKontenController::class, 'store'])->name('konten.store');
-    Route::delete('/konten/{id}', [KelasKontenController::class, 'destroy'])->name('konten.destroy');
     Route::put('/konten/{id}', [KelasKontenController::class, 'update'])->name('konten.update');
+    Route::delete('/konten/{id}', [KelasKontenController::class, 'destroy'])->name('konten.destroy');
 
     // ------------------------------------------------------------------------
     // KELAS ANGGOTA ROUTES (Guru Only)
@@ -79,11 +79,11 @@ Route::middleware('auth.custom')->group(function () {
     // ------------------------------------------------------------------------
 
     // Tugas CRUD (Guru)
-    Route::get('/kelas/{kelas}/tugas', [TugasController::class, 'index'])->name('tugas.index');
-    Route::post('/kelas/{kelas}/tugas', [TugasController::class, 'store'])->name('tugas.store');
+    Route::get('/kelas/{id}/tugas', [TugasController::class, 'index'])->name('tugas.index'); // ✅ DIPERBAIKI
+    Route::post('/kelas/{id}/tugas', [TugasController::class, 'store'])->name('tugas.store'); // ✅ DIPERBAIKI
     Route::get('/tugas/{id}', [TugasController::class, 'show'])->name('tugas.show');
-    Route::put('/kelas/{kelas}/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update');
-    Route::delete('/kelas/{kelas}/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy');
+    Route::put('/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update'); // ✅ DIPERBAIKI
+    Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy'); // ✅ DIPERBAIKI
 
     // Tugas Pengumpulan (Siswa)
     Route::post('/tugas/{tugas_id}/submit', [TugasPengumpulanController::class, 'store'])->name('tugas.submit');
@@ -98,15 +98,15 @@ Route::middleware('auth.custom')->group(function () {
 
     // Forum List & Detail
     Route::get('/kelas/{id}/forum', [ForumController::class, 'index'])->name('kelas.forum');
-    Route::get('/forum/{forum}', [ForumController::class, 'show'])->name('forum.show');
+    Route::get('/forum/{id}', [ForumController::class, 'show'])->name('forum.show'); // ✅ DIPERBAIKI
 
     // Forum Create & Store
     Route::get('/kelas/{kelas_id}/forum/create', [ForumController::class, 'create'])->name('forum.create');
     Route::post('/forum/store', [ForumController::class, 'store'])->name('forum.store');
 
     // Forum Update & Delete
-    Route::put('/forum/{forum}', [ForumController::class, 'update'])->name('forum.update');
-    Route::delete('/forum/{forum}', [ForumController::class, 'destroy'])->name('forum.destroy');
+    Route::put('/forum/{id}', [ForumController::class, 'update'])->name('forum.update'); // ✅ DIPERBAIKI
+    Route::delete('/forum/{id}', [ForumController::class, 'destroy'])->name('forum.destroy'); // ✅ DIPERBAIKI
 
     // ------------------------------------------------------------------------
     // FORUM KOMENTAR ROUTES

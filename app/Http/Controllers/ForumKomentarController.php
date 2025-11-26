@@ -29,14 +29,12 @@ class ForumKomentarController extends Controller
         ]);
 
         // Ambil nama user dari session
-        $validated['dibuat_oleh'] = session('user_name') ?? session('identifier');
+        $validated['dibuat_oleh'] = session('user_name');
         $validated['pengirim_nisn_nip'] = session('identifier');
-        $validated['pengirim_tipe'] = session('role'); // 'guru' atau 'siswa'
 
-        $komentar = ForumKomentar::create($validated);
+        ForumKomentar::create($validated);
 
-        // Redirect kembali ke forum detail
-        return redirect()->route('forum.show', $validated['forum_id'])->with('success', 'Komentar berhasil ditambahkan');
+        return back()->with('success', 'Komentar berhasil ditambahkan!');
     }
 
     public function update(Request $request, $id)
