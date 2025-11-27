@@ -12,7 +12,7 @@ return new class extends Migration {
             $table->foreignId('kelas_id')->constrained()->cascadeOnDelete();
             $table->string('judul');
             $table->text('isi');
-            $table->string('dibuat_oleh', 20);
+            $table->string('dibuat_oleh', 255);
             $table->timestamps();
         });
     }
