@@ -1,293 +1,337 @@
-<!DOCTYPE html>
-<html lang="id">
+@extends('layouts.app')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $kelas->nama_kelas }} - LMS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
+@php use Illuminate\Support\Str; @endphp
 
-<body class="bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b">
-        <div class="container mx-auto px-6 py-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
-                    <a href="{{ route('dashboard') }}" class="text-gray-600 hover:text-gray-800">
-                        <i class="fas fa-arrow-left text-xl"></i>
-                    </a>
+@section('title', $kelas->nama_kelas)
+
+@section('content')
+    <div class="container py-4">
+
+        <!-- Header Kelas -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-800">{{ $kelas->nama_kelas }}</h1>
-                        <p class="text-sm text-gray-600">{{ $kelas->guru->nama_guru }} • Kode: {{ $kelas->kode_kelas }}
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none text-secondary mb-2 d-inline-block">
+                            <i class="bi bi-arrow-left"></i> Kembali
+                        </a>
+                        <h3 class="fw-bold mb-2">{{ $kelas->nama_kelas }}</h3>
+                        <p class="text-secondary mb-2">
+                            <i class="bi bi-person-circle"></i> {{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }}
+                            • <i class="bi bi-key"></i> Kode: {{ $kelas->kode_kelas }}
                         </p>
+                        <p class="text-muted small mb-0">{{ $kelas->deskripsi }}</p>
                     </div>
+
+                    <!-- Badge Status Siswa -->
+                    <span class="badge bg-success fs-6">
+                        <i class="bi bi-check-circle"></i> Anggota Kelas
+                    </span>
                 </div>
             </div>
         </div>
-    </header>
 
-    <!-- Tabs Navigation -->
-    <div class="bg-white border-b">
-        <div class="container mx-auto px-6">
-            <div class="flex space-x-8">
-                <button onclick="showTab('konten')" id="tab-konten"
-                    class="tab-button py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold">
-                    <i class="fas fa-book mr-2"></i>Konten
-                </button>
-                <button onclick="showTab('tugas')" id="tab-tugas"
-                    class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-tasks mr-2"></i>Tugas
-                </button>
-                <button onclick="showTab('forum')" id="tab-forum"
-                    class="tab-button py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-gray-800">
-                    <i class="fas fa-comments mr-2"></i>Forum
-                </button>
-            </div>
-        </div>
-    </div>
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link {{ !request()->is('kelas/*/tugas') && !request()->is('kelas/*/forum') ? 'active' : '' }}"
+                    href="{{ route('kelas.show', $kelas->id) }}">
+                    <i class="bi bi-book"></i> Konten
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->is('kelas/*/tugas') ? 'active' : '' }}"
+                    href="{{ route('tugas.index', $kelas->id) }}">
+                    <i class="bi bi-clipboard-check"></i> Tugas
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->is('kelas/*/forum') ? 'active' : '' }}"
+                    href="{{ route('kelas.forum', $kelas->id) }}">
+                    <i class="bi bi-chat-dots"></i> Forum
+                </a>
+            </li>
+        </ul>
 
-    <!-- Main Content -->
-    <main class="container mx-auto px-6 py-8">
-        <!-- Tab Konten -->
-        <div id="content-konten" class="tab-content">
-            <h2 class="text-xl font-bold text-gray-800 mb-6">Materi Pembelajaran</h2>
+        <!-- ========================================= -->
+        <!-- TAB KONTEN -->
+        <!-- ========================================= -->
+        @if (!request()->is('kelas/*/tugas') && !request()->is('kelas/*/forum'))
 
-            @if ($kelas->konten->count() > 0)
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    @foreach ($kelas->konten as $konten)
-                        <div
-                            class="bg-white rounded-lg shadow-md p-6 border border-gray-200 hover:shadow-lg transition">
-                            <div class="flex items-start space-x-3 mb-4">
-                                @if ($konten->tipe === 'file')
-                                    <div class="bg-blue-100 p-3 rounded-lg">
-                                        <i class="fas fa-file text-blue-600 text-xl"></i>
-                                    </div>
-                                @elseif($konten->tipe === 'link')
-                                    <div class="bg-green-100 p-3 rounded-lg">
-                                        <i class="fas fa-link text-green-600 text-xl"></i>
-                                    </div>
-                                @else
-                                    <div class="bg-purple-100 p-3 rounded-lg">
-                                        <i class="fas fa-align-left text-purple-600 text-xl"></i>
-                                    </div>
-                                @endif
-                                <div class="flex-1">
-                                    <h3 class="font-bold text-gray-800 mb-1">{{ $konten->judul }}</h3>
-                                    <p class="text-sm text-gray-500">{{ $konten->created_at->format('d M Y') }}</p>
+            <h5 class="mb-3">Materi Pembelajaran</h5>
+
+            <div class="row g-3">
+                @forelse($kelas->konten()->orderBy('created_at', 'desc')->get() as $konten)
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span
+                                        class="badge {{ $konten->tipe == 'file' ? 'bg-primary' : ($konten->tipe == 'link' ? 'bg-info' : 'bg-secondary') }}">
+                                        <i
+                                            class="bi bi-{{ $konten->tipe == 'file' ? 'file-earmark' : ($konten->tipe == 'link' ? 'link-45deg' : 'text-left') }}"></i>
+                                        {{ ucfirst($konten->tipe) }}
+                                    </span>
+                                    <small class="text-muted">{{ $konten->created_at->format('d M Y') }}</small>
                                 </div>
-                            </div>
 
-                            @if ($konten->tipe === 'teks')
-                                <p class="text-gray-600 mb-4">{{ Str::limit($konten->isi, 100) }}</p>
-                            @endif
+                                <h6 class="fw-bold mb-2">{{ $konten->judul }}</h6>
 
-                            @if ($konten->tipe === 'file')
-                                <a href="{{ asset('storage/' . $konten->file_path) }}" target="_blank"
-                                    class="block w-full bg-blue-600 text-white text-center py-2 rounded-lg hover:bg-blue-700 transition">
-                                    <i class="fas fa-download mr-2"></i>Download File
-                                </a>
-                            @elseif($konten->tipe === 'link')
-                                <a href="{{ $konten->isi }}" target="_blank"
-                                    class="block w-full bg-green-600 text-white text-center py-2 rounded-lg hover:bg-green-700 transition">
-                                    <i class="fas fa-external-link-alt mr-2"></i>Buka Link
-                                </a>
-                            @endif
-                        </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="text-center py-12 bg-white rounded-lg">
-                    <i class="fas fa-book-open text-gray-300 text-6xl mb-4"></i>
-                    <p class="text-gray-500">Belum ada materi pembelajaran</p>
-                </div>
-            @endif
-        </div>
+                                @if ($konten->tipe == 'teks')
+                                    <p class="text-secondary small mb-3">{{ Str::limit($konten->isi, 100) }}</p>
+                                @endif
 
-        <!-- Tab Tugas -->
-        <div id="content-tugas" class="tab-content hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-6">Daftar Tugas</h2>
-
-            @if ($kelas->tugas->count() > 0)
-                <div class="space-y-4">
-                    @foreach ($kelas->tugas as $tugas)
-                        @php
-                            $sudahDikumpulkan = in_array($tugas->id, $tugasDikumpulkan);
-                            $pengumpulan = $sudahDikumpulkan
-                                ? \App\Models\TugasPengumpulan::where('tugas_id', $tugas->id)
-                                    ->where('siswa_nisn', session('identifier'))
-                                    ->first()
-                                : null;
-                        @endphp
-
-                        <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                            <div class="flex justify-between items-start">
-                                <div class="flex-1">
-                                    <div class="flex items-center space-x-3 mb-2">
-                                        <h3 class="text-lg font-bold text-gray-800">{{ $tugas->judul }}</h3>
-                                        @if ($sudahDikumpulkan && $pengumpulan->nilai)
-                                            <span
-                                                class="bg-green-100 text-green-800 text-xs px-3 py-1 rounded-full font-semibold">
-                                                Nilai: {{ $pengumpulan->nilai }}
-                                            </span>
-                                        @endif
-                                    </div>
-                                    <p class="text-gray-600 mb-4">{{ $tugas->deskripsi }}</p>
-
-                                    <div class="flex items-center space-x-6 text-sm mb-4">
-                                        <div class="flex items-center text-gray-600">
-                                            <i class="fas fa-calendar mr-2"></i>
-                                            <span>Deadline: {{ $tugas->deadline->format('d M Y, H:i') }}</span>
-                                        </div>
-                                        <div class="flex items-center text-gray-600">
-                                            <i class="fas fa-star mr-2"></i>
-                                            <span>Nilai Maksimal: {{ $tugas->nilai_maksimal }}</span>
-                                        </div>
-                                    </div>
-
-                                    @if ($sudahDikumpulkan)
-                                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
-                                            <div class="flex items-center text-green-700 mb-2">
-                                                <i class="fas fa-check-circle mr-2"></i>
-                                                <span class="font-semibold">Tugas telah dinilai</span>
-                                            </div>
-                                            <p class="text-sm text-gray-600">Nilai Anda:
-                                                {{ $pengumpulan->nilai ?? 'Belum dinilai' }}</p>
-                                            @if ($pengumpulan->feedback)
-                                                <p class="text-sm text-gray-600 mt-2">
-                                                    <strong>Feedback:</strong> {{ $pengumpulan->feedback }}
-                                                </p>
-                                            @endif
-                                        </div>
+                                <div class="mt-auto">
+                                    @if ($konten->tipe == 'file')
+                                        <a href="{{ asset('storage/' . $konten->file_path) }}"
+                                            class="btn btn-primary btn-sm w-100" download>
+                                            <i class="bi bi-download"></i> Download File
+                                        </a>
+                                    @elseif($konten->tipe == 'link')
+                                        <a href="{{ $konten->isi }}" target="_blank" class="btn btn-info btn-sm w-100">
+                                            <i class="bi bi-box-arrow-up-right"></i> Buka Link
+                                        </a>
                                     @else
-                                        <button onclick="showSubmitModal({{ $tugas->id }}, '{{ $tugas->judul }}')"
-                                            class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-                                            <i class="fas fa-upload mr-2"></i>Kumpulkan Tugas
+                                        <button class="btn btn-secondary btn-sm w-100" data-bs-toggle="modal"
+                                            data-bs-target="#modalViewKonten{{ $konten->id }}">
+                                            <i class="bi bi-eye"></i> Lihat Konten
                                         </button>
                                     @endif
                                 </div>
                             </div>
                         </div>
-                    @endforeach
-                </div>
-            @else
-                <div class="text-center py-12 bg-white rounded-lg">
-                    <i class="fas fa-tasks text-gray-300 text-6xl mb-4"></i>
-                    <p class="text-gray-500">Belum ada tugas</p>
-                </div>
-            @endif
-        </div>
+                    </div>
 
-        <!-- Tab Forum -->
-        <div id="content-forum" class="tab-content hidden">
-            <h2 class="text-xl font-bold text-gray-800 mb-6">Forum Diskusi</h2>
+                    <!-- Modal View Konten Teks -->
+                    @if ($konten->tipe == 'teks')
+                        <div class="modal fade" id="modalViewKonten{{ $konten->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ $konten->judul }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted small mb-3">
+                                            <i class="bi bi-calendar"></i> {{ $konten->created_at->format('d M Y, H:i') }}
+                                        </p>
+                                        <div class="content-text">
+                                            {{ $konten->isi }}
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Tutup</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
-            <div class="bg-white rounded-lg shadow-md p-6">
-                <p class="text-gray-600 mb-4">Diskusikan materi pembelajaran dengan teman dan guru Anda</p>
-                <a href="{{ route('kelas.forum', $kelas->id) }}"
-                    class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
-                    <i class="fas fa-comments mr-2"></i>Lihat Forum
-                </a>
+                @empty
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="bi bi-inbox fs-1 text-muted"></i>
+                                <p class="text-secondary mt-3 mb-0">Belum ada materi pembelajaran</p>
+                                <small class="text-muted">Guru belum menambahkan konten</small>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
             </div>
-        </div>
-    </main>
 
-    <!-- Modal Submit Tugas -->
-    <div id="modalSubmit" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full mx-4">
-            <h3 class="text-2xl font-bold mb-6">Kumpulkan Tugas: <span id="judulTugas"></span></h3>
-            <form id="formSubmit" method="POST" enctype="multipart/form-data">
-                @csrf
-                <input type="hidden" name="tugas_id" id="tugasId">
-                <input type="hidden" name="siswa_nisn" value="{{ session('identifier') }}">
+        @endif
 
-                <div class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Tipe Pengumpulan</label>
-                    <select name="tipe" id="tipe-submit" class="w-full px-4 py-2 border rounded-lg"
-                        onchange="toggleSubmitInput()" required>
-                        <option value="file">Upload File</option>
-                        <option value="link">Link URL</option>
-                        <option value="teks">Teks</option>
-                    </select>
-                </div>
+        <!-- ========================================= -->
+        <!-- TAB TUGAS -->
+        <!-- ========================================= -->
+        @if (request()->is('kelas/*/tugas'))
 
-                <div id="submit-file" class="mb-4">
-                    <label class="block text-gray-700 font-semibold mb-2">Upload File</label>
-                    <input type="file" name="file_path" class="w-full px-4 py-2 border rounded-lg">
-                </div>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="mb-0">Daftar Tugas</h5>
+                <span class="badge bg-primary">{{ $kelas->tugas->count() }} Tugas</span>
+            </div>
 
-                <div id="submit-link" class="mb-4 hidden">
-                    <label class="block text-gray-700 font-semibold mb-2">URL Link</label>
-                    <input type="url" name="isi" class="w-full px-4 py-2 border rounded-lg"
-                        placeholder="https://example.com">
-                </div>
+            <div class="row g-3">
+                @forelse($kelas->tugas as $tugas)
+                    @php
+                        $sudahDikumpulkan = isset($tugasDikumpulkan) && in_array($tugas->id, $tugasDikumpulkan);
+                        $pengumpulan = $sudahDikumpulkan
+                            ? \App\Models\TugasPengumpulan::where('tugas_id', $tugas->id)
+                                ->where('siswa_nisn', session('identifier'))
+                                ->first()
+                            : null;
 
-                <div id="submit-teks" class="mb-4 hidden">
-                    <label class="block text-gray-700 font-semibold mb-2">Jawaban Anda</label>
-                    <textarea name="isi" class="w-full px-4 py-2 border rounded-lg" rows="6"></textarea>
-                </div>
+                        $deadline = \Carbon\Carbon::parse($tugas->deadline);
+                        $now = \Carbon\Carbon::now();
+                        $isLate = $now->greaterThan($deadline);
+                    @endphp
 
-                <div class="flex space-x-4">
-                    <button type="button" onclick="hideSubmitModal()"
-                        class="flex-1 bg-gray-200 py-2 rounded-lg hover:bg-gray-300">
-                        Batal
-                    </button>
-                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700">
-                        <i class="fas fa-paper-plane mr-2"></i>Kumpulkan
-                    </button>
-                </div>
-            </form>
-        </div>
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div class="flex-grow-1">
+                                        <h5 class="fw-bold mb-2">{{ $tugas->judul }}</h5>
+                                        <p class="text-muted mb-3">{{ $tugas->deskripsi }}</p>
+
+                                        <div class="row g-2 mb-3">
+                                            <div class="col-md-6">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-calendar-event"></i>
+                                                    Deadline: {{ $deadline->format('d M Y, H:i') }}
+                                                </small>
+                                                @if ($isLate && !$sudahDikumpulkan)
+                                                    <span class="badge bg-danger ms-2">Terlambat</span>
+                                                @endif
+                                            </div>
+                                            <div class="col-md-6">
+                                                <small class="text-muted">
+                                                    <i class="bi bi-star"></i>
+                                                    Nilai Maksimal: {{ $tugas->nilai_maksimal }}
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        @if ($sudahDikumpulkan)
+                                            <!-- Status Sudah Dikumpulkan -->
+                                            <div class="alert alert-success border-0 mb-0">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="bi bi-check-circle-fill fs-4 me-3"></i>
+                                                    <div class="flex-grow-1">
+                                                        <h6 class="mb-1">Tugas Sudah Dikumpulkan</h6>
+                                                        <p class="mb-2 small">
+                                                            Dikumpulkan:
+                                                            {{ $pengumpulan->created_at->format('d M Y, H:i') }}
+                                                        </p>
+                                                        @if ($pengumpulan->nilai)
+                                                            <div class="d-flex align-items-center gap-2">
+                                                                <span class="badge bg-success fs-6">
+                                                                    Nilai:
+                                                                    {{ $pengumpulan->nilai }}/{{ $tugas->nilai_maksimal }}
+                                                                </span>
+                                                            </div>
+                                                            @if ($pengumpulan->feedback)
+                                                                <div class="mt-2 p-2 bg-light rounded">
+                                                                    <small class="fw-semibold">Feedback Guru:</small>
+                                                                    <p class="mb-0 small">{{ $pengumpulan->feedback }}</p>
+                                                                </div>
+                                                            @endif
+                                                        @else
+                                                            <span class="badge bg-warning">Menunggu Penilaian</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @else
+                                            <!-- Tombol Kumpulkan -->
+                                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                                data-bs-target="#modalKumpulkanTugas{{ $tugas->id }}">
+                                                <i class="bi bi-upload"></i> Kumpulkan Tugas
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal Kumpulkan Tugas -->
+                    @if (!$sudahDikumpulkan)
+                        <div class="modal fade" id="modalKumpulkanTugas{{ $tugas->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Kumpulkan: {{ $tugas->judul }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <form action="{{ route('tugas.submit', $tugas->id) }}" method="POST"
+                                        enctype="multipart/form-data">
+                                        @csrf
+                                        <input type="hidden" name="tugas_id" value="{{ $tugas->id }}">
+                                        <input type="hidden" name="siswa_nisn" value="{{ session('identifier') }}">
+
+                                        <div class="modal-body">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-semibold">Tipe Pengumpulan *</label>
+                                                <select name="tipe" id="tipeSubmit{{ $tugas->id }}"
+                                                    class="form-select" onchange="toggleSubmitInput({{ $tugas->id }})"
+                                                    required>
+                                                    <option value="file">Upload File</option>
+                                                    <option value="link">Link URL</option>
+                                                    <option value="teks">Teks Jawaban</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- File Upload -->
+                                            <div id="submitFile{{ $tugas->id }}" class="mb-3">
+                                                <label class="form-label fw-semibold">Upload File *</label>
+                                                <input type="file" name="file_path" class="form-control">
+                                                <small class="text-muted">Format: PDF, Word, Excel, Gambar (Max:
+                                                    10MB)</small>
+                                            </div>
+
+                                            <!-- Link -->
+                                            <div id="submitLink{{ $tugas->id }}" class="mb-3 d-none">
+                                                <label class="form-label fw-semibold">URL Link *</label>
+                                                <input type="url" name="isi" class="form-control"
+                                                    placeholder="https://example.com">
+                                            </div>
+
+                                            <!-- Text -->
+                                            <div id="submitTeks{{ $tugas->id }}" class="mb-3 d-none">
+                                                <label class="form-label fw-semibold">Jawaban Anda *</label>
+                                                <textarea name="isi" class="form-control" rows="6" placeholder="Tulis jawaban Anda di sini..."></textarea>
+                                            </div>
+                                        </div>
+
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary"
+                                                data-bs-dismiss="modal">Batal</button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-send"></i> Kumpulkan
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                @empty
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="bi bi-clipboard-x fs-1 text-muted"></i>
+                                <p class="text-secondary mt-3 mb-0">Belum ada tugas</p>
+                                <small class="text-muted">Guru belum memberikan tugas</small>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
+            </div>
+
+        @endif
+
     </div>
 
+    <!-- JavaScript untuk Toggle Input -->
     <script>
-        function showTab(tab) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-button').forEach(el => {
-                el.classList.remove('border-blue-600', 'text-blue-600');
-                el.classList.add('border-transparent', 'text-gray-600');
-            });
+        function toggleSubmitInput(tugasId) {
+            const tipe = document.getElementById('tipeSubmit' + tugasId).value;
 
-            // Show selected tab
-            document.getElementById('content-' + tab).classList.remove('hidden');
-            document.getElementById('tab-' + tab).classList.remove('border-transparent', 'text-gray-600');
-            document.getElementById('tab-' + tab).classList.add('border-blue-600', 'text-blue-600');
-        }
-
-        function showSubmitModal(tugasId, judul) {
-            document.getElementById('tugasId').value = tugasId;
-            document.getElementById('judulTugas').textContent = judul;
-            document.getElementById('formSubmit').action = `/tugas/${tugasId}/submit`;
-            document.getElementById('modalSubmit').classList.remove('hidden');
-        }
-
-        function hideSubmitModal() {
-            document.getElementById('modalSubmit').classList.add('hidden');
-        }
-
-        function toggleSubmitInput() {
-            const tipe = document.getElementById('tipe-submit').value;
-            document.getElementById('submit-file').classList.add('hidden');
-            document.getElementById('submit-link').classList.add('hidden');
-            document.getElementById('submit-teks').classList.add('hidden');
+            document.getElementById('submitFile' + tugasId).classList.add('d-none');
+            document.getElementById('submitLink' + tugasId).classList.add('d-none');
+            document.getElementById('submitTeks' + tugasId).classList.add('d-none');
 
             if (tipe === 'file') {
-                document.getElementById('submit-file').classList.remove('hidden');
+                document.getElementById('submitFile' + tugasId).classList.remove('d-none');
             } else if (tipe === 'link') {
-                document.getElementById('submit-link').classList.remove('hidden');
+                document.getElementById('submitLink' + tugasId).classList.remove('d-none');
             } else if (tipe === 'teks') {
-                document.getElementById('submit-teks').classList.remove('hidden');
+                document.getElementById('submitTeks' + tugasId).classList.remove('d-none');
             }
         }
     </script>
-
-    @if (session('success'))
-        <div class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
-            {{ session('success') }}
-        </div>
-    @endif
-</body>
-
-</html>
+@endsection
