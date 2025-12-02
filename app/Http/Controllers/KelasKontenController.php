@@ -18,7 +18,7 @@ class KelasKontenController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'tipe' => 'required|in:file,link,teks',
-            'isi' => 'required_if:tipe,link,teks|nullable|string',
+            'isi' => 'nullable|string',
             'file_path' => 'required_if:tipe,file|nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,zip,rar|max:10240',
         ], [
             'judul.required' => 'Judul konten wajib diisi',

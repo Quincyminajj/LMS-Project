@@ -260,7 +260,7 @@
                             <!-- Link -->
                             <div id="linkField" class="mb-3 d-none">
                                 <label class="form-label fw-semibold">Masukkan Link *</label>
-                                <input type="url" name="isi" class="form-control"
+                                <input type="text" name="isi" class="form-control"
                                     placeholder="https://example.com">
                             </div>
 
