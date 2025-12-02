@@ -92,7 +92,8 @@ class TugasController extends Controller
             $tugas = Tugas::findOrFail($id);
             $tugas->delete();
 
-            return back()->with('success', 'Tugas berhasil dihapus!');
+            return redirect()->route('tugas.index', $kelasId)
+                ->with('success', 'Tugas berhasil dihapus!');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menghapus tugas: ' . $e->getMessage());
         }

@@ -82,8 +82,9 @@ Route::middleware('auth.custom')->group(function () {
     Route::get('/kelas/{id}/tugas', [TugasController::class, 'index'])->name('tugas.index'); // ✅ DIPERBAIKI
     Route::post('/kelas/{id}/tugas', [TugasController::class, 'store'])->name('tugas.store'); // ✅ DIPERBAIKI
     Route::get('/tugas/{id}', [TugasController::class, 'show'])->name('tugas.show');
-    Route::put('/tugas/{id}', [TugasController::class, 'update'])->name('tugas.update'); // ✅ DIPERBAIKI
-    Route::delete('/tugas/{id}', [TugasController::class, 'destroy'])->name('tugas.destroy'); // ✅ DIPERBAIKI
+    Route::put('/kelas/{kelas}/tugas/{tugas}', [TugasController::class, 'update'])->name('tugas.update'); // ✅ DIPERBAIKI
+    Route::delete('/kelas/{kelas}/tugas/{tugas}', [TugasController::class, 'destroy'])->name('tugas.destroy');
+
 
     // Tugas Pengumpulan (Siswa)
     Route::post('/tugas/{tugas_id}/submit', [TugasPengumpulanController::class, 'store'])->name('tugas.submit');

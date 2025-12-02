@@ -84,12 +84,18 @@
                                             <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
                                                     data-bs-target="#modalEditTugas{{ $tugas->id }}">Edit</a></li>
                                             <li>
-                                                <form action="{{ route('tugas.destroy', [$kelas->id, $tugas->id]) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus tugas ini?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger">Hapus</button>
+                                                <form id="delete-tugas-{{ $tugas->id }}"
+                                                    action="{{ route('tugas.destroy', ['kelas' => $tugas->kelas_id, 'tugas' => $tugas->id]) }}"
+                                                    method="POST" style="display:none;">
+                                                    @csrf
+                                                    @method('DELETE')
                                                 </form>
+
+                                                <button type="button"
+                                                        class="dropdown-item text-danger"
+                                                        onclick="confirmDeleteTugas({{ $tugas->id }})">
+                                                    Hapus
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>
@@ -247,4 +253,22 @@
             </div>
         </div>
     @endsection
+    <script>
+        function confirmDeleteTugas(id) {
+            Swal.fire({
+                title: 'Hapus Tugas?',
+                text: "Tugas beserta data terkait akan dihapus secara permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`delete-tugas-${id}`).submit();
+                }
+            })
+        }
+</script>
 @endif

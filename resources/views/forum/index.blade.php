@@ -76,12 +76,17 @@
                                         </button>
                                         <ul class="dropdown-menu">
                                             <li>
-                                                <form action="{{ route('forum-komentar.destroy', $forum->id) }}"
-                                                    method="POST"
-                                                    onsubmit="return confirm('Yakin ingin menghapus diskusi ini?')">
-                                                    @csrf @method('DELETE')
-                                                    <button type="submit" class="dropdown-item text-danger">Hapus</button>
+                                                <form id="delete-form-{{ $forum->id }}" 
+                                                    action="{{ route('forum.destroy', $forum->id) }}"
+                                                    method="POST" style="display:none;">
+                                                    @csrf
+                                                    @method('DELETE')
                                                 </form>
+
+                                                <button type="button" class="dropdown-item text-danger"
+                                                        onclick="confirmDeleteForum({{ $forum->id }})">
+                                                    Hapus Diskusi
+                                                </button>
                                             </li>
                                         </ul>
                                     </div>
@@ -106,7 +111,25 @@
                     </div>
                 </div>
             @endforelse
+                <script>
+                        function confirmDeleteForum(id) {
+                            Swal.fire({
+                                title: 'Hapus Diskusi?',
+                                text: "Aksi ini tidak dapat dibatalkan!",
+                                icon: 'warning',
+                                showCancelButton: true,
+                                confirmButtonText: 'Ya, Hapus!',
+                                cancelButtonText: 'Batal',
+                                confirmButtonColor: '#d33',
+                                cancelButtonColor: '#3085d6'
+                            }).then((result) => {
+                                if (result.isConfirmed) {
+                                    document.getElementById(`delete-form-${id}`).submit();
+                                }
+                            });
+                        }
+            </script>
         </div>
-
     </div>
+</div>
 @endsection

@@ -34,25 +34,27 @@
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form action="{{ route('kelas.archive', $kelas->id) }}" method="POST" 
-                                          onsubmit="return confirm('Yakin ingin mengarsipkan kelas ini?')">
+                                    <form id="arsip-kelas-{{ $kelas->id }}" action="{{ route('kelas.archive', $kelas->id) }}" method="POST" style="display:none;">
                                         @csrf
                                         @method('PUT')
-                                        <button type="submit" class="dropdown-item text-warning">
-                                            <i class="bi bi-archive"></i> Arsipkan Kelas
-                                        </button>
                                     </form>
+
+                                    <button type="button" class="dropdown-item text-warning"
+                                            onclick="confirmAction({{ $kelas->id }}, 'arsip-kelas')">
+                                        <i class="bi bi-archive"></i> Arsipkan Kelas
+                                    </button>
                                 </li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form action="{{ route('kelas.destroy', $kelas->id) }}" method="POST" 
-                                          onsubmit="return confirm('Yakin ingin menghapus permanen kelas ini? Data tidak bisa dikembalikan!')">
+                                    <form id="hapus-kelas-{{ $kelas->id }}" action="{{ route('kelas.destroy', $kelas->id) }}" method="POST" style="display:none;">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-trash"></i> Hapus Permanen
-                                        </button>
                                     </form>
+
+                                    <button type="button" class="dropdown-item text-danger"
+                                            onclick="confirmAction({{ $kelas->id }}, 'hapus-kelas')">
+                                        <i class="bi bi-trash"></i> Hapus Permanen
+                                    </button>
                                 </li>
                             </ul>
                         </div>
@@ -121,13 +123,15 @@
                                                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
                                                         data-bs-target="#modalEditKonten{{ $konten->id }}">Edit</a></li>
                                                 <li>
-                                                    <form action="{{ route('konten.destroy', $konten->id) }}"
-                                                        method="POST"
-                                                        onsubmit="return confirm('Yakin ingin menghapus konten ini?')">
-                                                        @csrf @method('DELETE')
-                                                        <button type="submit"
-                                                            class="dropdown-item text-danger">Hapus</button>
+                                                    <form id="hapus-konten-{{ $konten->id }}" action="{{ route('konten.destroy', $konten->id) }}" method="POST" style="display:none;">
+                                                        @csrf
+                                                        @method('DELETE')
                                                     </form>
+
+                                                    <button type="button" class="dropdown-item text-danger"
+                                                            onclick="confirmAction({{ $konten->id }}, 'hapus-konten')">
+                                                        Hapus Konten
+                                                    </button>
                                                 </li>
                                             </ul>
                                         </div>
@@ -288,6 +292,53 @@
                 if (tipe === 'link') document.getElementById('linkField').classList.remove('d-none');
                 if (tipe === 'teks') document.getElementById('textField').classList.remove('d-none');
             });
+        </script>
+        <script>
+        function confirmAction(id, action) {
+
+            let title = '';
+            let text = '';
+            let confirmText = '';
+            let color = '#d33'; // default merah untuk hapus
+
+            switch(action) {
+                case 'hapus-kelas':
+                    title = 'Hapus Kelas?';
+                    text = 'Kelas dan semua data terkait akan dihapus permanen!';
+                    confirmText = 'Ya, Hapus!';
+                    color = '#d33';
+                    break;
+
+                case 'arsip-kelas':
+                    title = 'Arsipkan Kelas?';
+                    text = 'Kelas akan dipindahkan ke arsip dan tidak muncul di daftar aktif.';
+                    confirmText = 'Arsipkan!';
+                    color = '#f0ad4e'; // kuning untuk arsip
+                    break;
+
+                case 'hapus-konten':
+                    title = 'Hapus Konten?';
+                    text = 'Konten ini akan dihapus secara permanen!';
+                    confirmText = 'Ya, Hapus!';
+                    color = '#d33';
+                    break;
+            }
+
+            Swal.fire({
+                title: title,
+                text: text,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: color,
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: confirmText,
+                cancelButtonText: 'Batal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`${action}-${id}`).submit();
+                }
+            })
+        }
         </script>
     @endsection
 @endif

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LMS Dashboard - Portal Siswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gray-50">
@@ -27,9 +28,10 @@
                     <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-lg font-bold">
                         {{ substr(session('user_name'), 0, 1) }}
                     </div>
-                    <a href="{{ route('logout') }}" class="text-white hover:text-blue-200">
+                    <a href="#" class="text-white hover:text-blue-200" id="logoutButton">
                         <i class="fas fa-sign-out-alt"></i>
                     </a>
+                    <form id="logoutForm" action="{{ route('logout') }}" method="GET" class="d-none"></form>
                 </div>
             </div>
         </div>
@@ -182,6 +184,27 @@
             </form>
         </div>
     </div>
+
+    <script>
+        document.getElementById('logoutButton').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            Swal.fire({
+                title: "Yakin ingin logout?",
+                text: "Anda akan keluar dari sistem.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Ya, Logout",
+                cancelButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('logoutForm').submit();
+                }
+            });
+    });
+    </script>
 
     <script>
         function showJoinModal() {
