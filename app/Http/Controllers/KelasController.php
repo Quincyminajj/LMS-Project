@@ -10,6 +10,31 @@ use Illuminate\Support\Str;
 class KelasController extends Controller
 {
     /**
+     * Generate kode kelas unik dan kompleks
+     * Format: KLS-YYMM-XXXXX
+     * Contoh: KLS-2512-A3F7B
+     */
+    private function generateKodeKelas()
+    {
+        do {
+            // Tahun (2 digit) + Bulan (2 digit)
+            $yearMonth = date('ym');
+            
+            // Generate random alphanumeric 5 karakter
+            $random = strtoupper(Str::random(5));
+            
+            // Gabungkan
+            $kodeKelas = "KLS-{$yearMonth}-{$random}";
+            
+            // Cek keunikan
+            $exists = Kelas::where('kode_kelas', $kodeKelas)->exists();
+            
+        } while ($exists);
+        
+        return $kodeKelas;
+    }
+
+    /**
      * Tampilkan semua kelas (tidak termasuk arsip)
      */
     public function index()
@@ -23,18 +48,9 @@ class KelasController extends Controller
      */
     public function create()
     {
-        // Ambil kelas terakhir
-        $lastKelas = Kelas::orderBy('id', 'desc')->first();
-
         // Generate kode baru
-        if (!$lastKelas) {
-            $newCode = 'KLS-001';
-        } else {
-            $lastNumber = intval(substr($lastKelas->kode_kelas, 4));
-            $newCode = 'KLS-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        }
+        $newCode = $this->generateKodeKelas();
 
-        // Kirim ke view
         return view('kelas.guru.create', compact('newCode'));
     }
 
@@ -48,15 +64,8 @@ class KelasController extends Controller
             'deskripsi'  => 'required|string',
         ]);
 
-        // Generate kode kelas otomatis
-        $lastKelas = Kelas::orderBy('id', 'desc')->first();
-
-        if (!$lastKelas) {
-            $newCode = 'KLS-001';
-        } else {
-            $lastNumber = intval(substr($lastKelas->kode_kelas, 4));
-            $newCode = 'KLS-' . str_pad($lastNumber + 1, 3, '0', STR_PAD_LEFT);
-        }
+        // Generate kode kelas otomatis yang kompleks
+        $newCode = $this->generateKodeKelas();
 
         Kelas::create([
             'kode_kelas' => $newCode,
@@ -66,7 +75,7 @@ class KelasController extends Controller
             'status'     => 'Aktif'
         ]);
 
-        return redirect()->route('dashboard')->with('success', 'Kelas berhasil dibuat!');
+        return redirect()->route('dashboard')->with('success', 'Kelas berhasil dibuat dengan kode: ' . $newCode);
     }
 
     /**
@@ -81,7 +90,7 @@ class KelasController extends Controller
 
         // GURU
         if ($userRole === 'guru' && $kelas->guru_nip === $identifier) {
-            return view('kelas.guru.show', compact('kelas'));  // ✅ View Bootstrap
+            return view('kelas.guru.show', compact('kelas'));
         }
 
         // SISWA
@@ -89,13 +98,12 @@ class KelasController extends Controller
             $isMember = $kelas->anggota()->where('siswa_nisn', $identifier)->exists();
 
             if ($isMember) {
-                // Ambil tugas yang sudah dikumpulkan
                 $tugasDikumpulkan = \App\Models\TugasPengumpulan::where('siswa_nisn', $identifier)
                     ->whereIn('tugas_id', $kelas->tugas->pluck('id'))
                     ->pluck('tugas_id')
                     ->toArray();
 
-                return view('kelas.siswa.show', compact('kelas', 'tugasDikumpulkan'));  // ✅ View Tailwind
+                return view('kelas.siswa.show', compact('kelas', 'tugasDikumpulkan'));
             }
         }
 
@@ -105,11 +113,10 @@ class KelasController extends Controller
     /**
      * Form edit kelas
      */
-    public function edit($id)  // ✅ DIPERBAIKI
+    public function edit($id)
     {
         $kelas = Kelas::findOrFail($id);
 
-        // Pastikan hanya guru yang bersangkutan yang bisa edit
         if ($kelas->guru_nip !== session('identifier')) {
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses.');
         }
@@ -121,11 +128,10 @@ class KelasController extends Controller
     /**
      * Update kelas
      */
-    public function update(Request $request, $id)  // ✅ DIPERBAIKI
+    public function update(Request $request, $id)
     {
         $kelas = Kelas::findOrFail($id);
 
-        // Pastikan hanya guru yang bersangkutan yang bisa update
         if ($kelas->guru_nip !== session('identifier')) {
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses.');
         }
@@ -140,7 +146,7 @@ class KelasController extends Controller
             'deskripsi'  => $request->deskripsi,
         ]);
 
-        return back()->with('success', 'Kelas berhasil diperbarui!');
+        return redirect()->route('kelas.show', $kelas->id)->with('success', 'Kelas berhasil diperbarui!');
     }
 
     /**
@@ -154,7 +160,6 @@ class KelasController extends Controller
             ->where('status', 'Arsip')
             ->with(['guru', 'anggota', 'tugas']);
 
-        // Filter pencarian
         if ($request->has('search') && $request->search) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -175,7 +180,6 @@ class KelasController extends Controller
     {
         $kelas = Kelas::findOrFail($id);
 
-        // Pastikan hanya guru yang bersangkutan
         if ($kelas->guru_nip !== session('identifier')) {
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses.');
         }
@@ -192,7 +196,6 @@ class KelasController extends Controller
     {
         $kelas = Kelas::findOrFail($id);
 
-        // Pastikan hanya guru yang bersangkutan
         if ($kelas->guru_nip !== session('identifier')) {
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses.');
         }
@@ -210,18 +213,13 @@ class KelasController extends Controller
         try {
             $kelas = Kelas::findOrFail($id);
 
-            // Pastikan hanya guru yang bersangkutan
             if ($kelas->guru_nip !== session('identifier')) {
                 return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses.');
             }
 
-            // Simpan nama kelas untuk pesan success
             $namaKelas = $kelas->nama_kelas;
-
-            // Hapus kelas (akan cascade delete semua data terkait)
             $kelas->delete();
 
-            // Redirect berdasarkan referer
             if (request()->header('referer') && strpos(request()->header('referer'), 'kelas-arsip') !== false) {
                 return redirect()->route('kelas.arsip')->with('success', "Kelas '{$namaKelas}' berhasil dihapus permanen!");
             }

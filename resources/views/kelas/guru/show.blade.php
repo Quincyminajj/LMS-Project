@@ -292,6 +292,20 @@
                 if (tipe === 'link') document.getElementById('linkField').classList.remove('d-none');
                 if (tipe === 'teks') document.getElementById('textField').classList.remove('d-none');
             });
+            function copyKodeKelas() {
+                const kode = document.getElementById('kodeKelasText').innerText;
+
+                navigator.clipboard.writeText(kode).then(() => {
+                    Swal.fire({
+                        toast: true,
+                        position: "top-end",
+                        icon: "success",
+                        title: "Kode kelas berhasil disalin!",
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                });
+            }
         </script>
         <script>
         function confirmAction(id, action) {

@@ -16,6 +16,7 @@
                         <h3 class="fw-bold mb-2">{{ $kelas->nama_kelas }}</h3>
                         <p class="text-secondary mb-0">{{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }} • Kode:
                             {{ $kelas->kode_kelas }}</p>
+                        <p class="text-muted small mb-0">{{ $kelas->deskripsi }}</p>
                     </div>
                 </div>
             </div>

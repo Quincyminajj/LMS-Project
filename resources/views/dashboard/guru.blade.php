@@ -120,10 +120,12 @@
                     @foreach ($kelasAktif as $kelas)
                         <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition">
                             <div class="bg-gradient-to-r from-blue-500 to-blue-600 p-4">
-                                <span
-                                    class="inline-block bg-white text-blue-600 text-xs px-3 py-1 rounded-full font-semibold">
-                                    {{ $kelas->kode_kelas }}
-                                </span>
+                            <span id="kodeKelasText"
+                                onclick="copyKodeKelas()"
+                                class="kode-badge inline-block bg-white text-blue-600 text-xs px-3 py-1 rounded-full font-semibold"
+                                style="cursor:pointer;">
+                                {{ $kelas->kode_kelas }}
+                            </span>
                             </div>
 
                             <div class="p-6">
@@ -175,6 +177,21 @@
     @endif
 
     <script>
+        function copyKodeKelas() {
+            const kode = document.getElementById('kodeKelasText').innerText;
+
+            navigator.clipboard.writeText(kode).then(() => {
+                Swal.fire({
+                    toast: true,
+                    position: "top-end",
+                    icon: "success",
+                    title: "Kode kelas disalin!",
+                    showConfirmButton: false,
+                    timer: 1400
+                });
+            });
+        }
+
         document.getElementById('logoutButton').addEventListener('click', function(e) {
             e.preventDefault();
 
