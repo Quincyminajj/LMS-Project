@@ -89,14 +89,13 @@ Route::middleware('auth.custom')->group(function () {
     Route::put('/forum/{id}', [ForumController::class, 'update'])->name('forum.update'); // ✅ DIPERBAIKI
     Route::delete('/forum/{id}', [ForumController::class, 'destroy'])->name('forum.destroy'); // ✅ DIPERBAIKI
 
-    // ------------------------------------------------------------------------
-    // FORUM KOMENTAR ROUTES
-    // ------------------------------------------------------------------------
+    // Forum Komentar
     Route::post('/forum-komentar', [ForumKomentarController::class, 'store'])->name('forum-komentar.store');
     Route::put('/forum-komentar/{id}', [ForumKomentarController::class, 'update'])->name('forum-komentar.update');
     Route::delete('/forum-komentar/{id}', [ForumKomentarController::class, 'destroy'])->name('forum-komentar.destroy');
 
     // Lihat Anggota Kelas
     Route::get('/kelas/{id}/anggota', [KelasController::class, 'anggota'])->name('kelas.anggota');
+    Route::get('/kelas/{kelasId}/anggota/{anggota}', [KelasAnggotaController::class, 'show'])->name('kelas.anggota.show');
     Route::get('/api/siswa/search', [KelasAnggotaController::class, 'searchSiswa'])->name('api.siswa.search');
 });

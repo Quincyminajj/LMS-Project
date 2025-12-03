@@ -242,7 +242,7 @@ public function anggota($id)
 
     // GURU - hanya guru pemilik kelas
     if ($userRole === 'guru' && $kelas->guru_nip === $identifier) {
-        return view('kelas.anggota.show', compact('kelas'));
+        return view('kelas.anggota.index', compact('kelas'));
     }
 
     // SISWA - hanya siswa yang terdaftar di kelas
@@ -250,7 +250,7 @@ public function anggota($id)
         $isMember = $kelas->anggota()->where('siswa_nisn', $identifier)->exists();
         
         if ($isMember) {
-            return view('kelas.anggota.show', compact('kelas'));
+            return view('kelas.anggota.index', compact('kelas'));
         }
     }
 

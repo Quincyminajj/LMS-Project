@@ -54,10 +54,18 @@ class KelasAnggotaController extends Controller
         }
     }
 
-    public function show(KelasAnggota $kelasAnggotum)
+    public function show($kelasId, KelasAnggota $anggota)
     {
-        return view('kelas_anggota.show', compact('kelasAnggotum'));
+        $anggota->load(['siswa', 'kelas']);
+
+        return view('kelas.anggota.show', [
+            'anggota' => $anggota,
+            'siswa' => $anggota->siswa,
+            'kelas' => $anggota->kelas
+        ]);
     }
+
+
 
     public function searchSiswa(Request $request)
     {
@@ -104,20 +112,20 @@ class KelasAnggotaController extends Controller
         }
     }
 
-public function destroy($id)
-{
-    try {
-        $kelasAnggotum = KelasAnggota::findOrFail($id);
-        $kelasId = $kelasAnggotum->kelas_id;
-        $namaSiswa = $kelasAnggotum->siswa->nama ?? 'Siswa';
-        
-        $kelasAnggotum->delete();
-        
-        return redirect()->route('kelas.anggota', ['id' => $kelasId])
-            ->with('success', "Siswa '{$namaSiswa}' berhasil dikeluarkan dari kelas!");
+    public function destroy($id)
+    {
+        try {
+            $kelasAnggotum = KelasAnggota::findOrFail($id);
+            $kelasId = $kelasAnggotum->kelas_id;
+            $namaSiswa = $kelasAnggotum->siswa->nama ?? 'Siswa';
             
-    } catch (\Exception $e) {
-        return back()->with('error', 'Gagal mengeluarkan siswa: ' . $e->getMessage());
+            $kelasAnggotum->delete();
+            
+            return redirect()->route('kelas.anggota', ['id' => $kelasId])
+                ->with('success', "Siswa '{$namaSiswa}' berhasil dikeluarkan dari kelas!");
+                
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal mengeluarkan siswa: ' . $e->getMessage());
+        }
     }
-}
 }

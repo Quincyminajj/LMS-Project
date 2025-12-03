@@ -25,7 +25,7 @@ class RbSiswa extends Authenticatable
         'hp',
         'foto',
         'status_siswa',
-        // tambahkan field lain sesuai kebutuhan
+        'angkatan',
     ];
 
     protected $hidden = [
