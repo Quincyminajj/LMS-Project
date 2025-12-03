@@ -229,4 +229,31 @@ class KelasController extends Controller
             return redirect()->route('dashboard')->with('error', 'Gagal menghapus kelas: ' . $e->getMessage());
         }
     }
+
+    /**
+ * Tampilkan daftar siswa dalam kelas
+ */
+public function anggota($id)
+{
+    $kelas = Kelas::with(['guru', 'anggota.siswa'])->findOrFail($id);
+    
+    $userRole = session('role');
+    $identifier = session('identifier');
+
+    // GURU - hanya guru pemilik kelas
+    if ($userRole === 'guru' && $kelas->guru_nip === $identifier) {
+        return view('kelas.anggota.show', compact('kelas'));
+    }
+
+    // SISWA - hanya siswa yang terdaftar di kelas
+    if ($userRole === 'siswa') {
+        $isMember = $kelas->anggota()->where('siswa_nisn', $identifier)->exists();
+        
+        if ($isMember) {
+            return view('kelas.anggota.show', compact('kelas'));
+        }
+    }
+
+    return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+}
 }

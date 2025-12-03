@@ -9,18 +9,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-<script>
-    @if (session('success'))
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: "{{ session('success') }}",
-            showConfirmButton: false,
-            timer: 2000
-        })
-    @endif
-</script>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
             <a class="navbar-brand" href="{{ route('dashboard') }}">LMS Diponegoro</a>
@@ -34,6 +22,34 @@
     @yield('modal')
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Session Success Message -->
+    <script>
+        @if (session('success'))
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: "{{ session('success') }}",
+                showConfirmButton: false,
+                timer: 2000
+            })
+        @endif
+        
+        @if (session('error'))
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: "{{ session('error') }}",
+                showConfirmButton: false,
+                timer: 3000
+            })
+        @endif
+    </script>
+    
+    <!-- Custom Scripts dari View -->
+    @yield('scripts')
 
 </body>
 </html>

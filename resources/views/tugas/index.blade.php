@@ -39,6 +39,12 @@
                     <i class="bi bi-chat-dots"></i> Forum
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->is('kelas/*/anggota') ? 'active' : '' }}"
+                    href="{{ route('kelas.anggota', $kelas->id) }}">
+                    <i class="bi bi-people"></i> Anggota
+                </a>
+            </li>
         </ul>
 
         <!-- Header Tugas -->

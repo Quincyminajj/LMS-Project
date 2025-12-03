@@ -12,35 +12,15 @@ use App\Http\Controllers\ForumController;
 use App\Http\Controllers\ForumKomentarController;
 use App\Http\Controllers\SiswaKelasController;
 
-/*
-|--------------------------------------------------------------------------
-| Web Routes
-|--------------------------------------------------------------------------
-*/
-
-// ============================================================================
-// PUBLIC ROUTES (Guest Only)
-// ============================================================================
-
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('home');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.process');
 Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// ============================================================================
-// PROTECTED ROUTES (Authenticated Users: Guru & Siswa)
-// ============================================================================
+
 
 Route::middleware('auth.custom')->group(function () {
-
-    // ------------------------------------------------------------------------
-    // DASHBOARD
-    // ------------------------------------------------------------------------
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-
-    // ------------------------------------------------------------------------
-    // KELAS ROUTES
-    // ------------------------------------------------------------------------
 
     // Kelas CRUD
     Route::get('/kelas', [KelasController::class, 'index'])->name('kelas.index');
@@ -115,4 +95,8 @@ Route::middleware('auth.custom')->group(function () {
     Route::post('/forum-komentar', [ForumKomentarController::class, 'store'])->name('forum-komentar.store');
     Route::put('/forum-komentar/{id}', [ForumKomentarController::class, 'update'])->name('forum-komentar.update');
     Route::delete('/forum-komentar/{id}', [ForumKomentarController::class, 'destroy'])->name('forum-komentar.destroy');
+
+    // Lihat Anggota Kelas
+    Route::get('/kelas/{id}/anggota', [KelasController::class, 'anggota'])->name('kelas.anggota');
+    Route::get('/api/siswa/search', [KelasAnggotaController::class, 'searchSiswa'])->name('api.siswa.search');
 });

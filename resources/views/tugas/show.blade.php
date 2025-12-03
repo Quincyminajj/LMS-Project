@@ -26,11 +26,13 @@
                             </div>
 
                             @if (session('role') === 'guru' && session('identifier') === $tugas->kelas->guru_nip)
-                                <div class="dropdown">
+                                <div class="dropdown position-relative">
                                     <button class="btn btn-light" data-bs-toggle="dropdown">
                                         <i class="bi bi-three-dots-vertical"></i>
                                     </button>
-                                    <ul class="dropdown-menu">
+                                    <ul class="dropdown-menu dropdown-menu-end mt-3"
+                                        style="min-width: 50px;"
+                                        data-bs-offset="20,0">
                                         <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
                                                 data-bs-target="#editTugasModal">
                                                 <i class="bi bi-pencil"></i> Edit Tugas
