@@ -97,5 +97,6 @@ Route::middleware('auth.custom')->group(function () {
     // Lihat Anggota Kelas
     Route::get('/kelas/{id}/anggota', [KelasController::class, 'anggota'])->name('kelas.anggota');
     Route::get('/kelas/{kelasId}/anggota/{anggota}', [KelasAnggotaController::class, 'show'])->name('kelas.anggota.show');
+    Route::get('/kelas/{id}/anggota', [KelasAnggotaController::class, 'index'])->name('kelas.anggota');
     Route::get('/api/siswa/search', [KelasAnggotaController::class, 'searchSiswa'])->name('api.siswa.search');
 });

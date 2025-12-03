@@ -47,22 +47,61 @@
 
     <!-- Header Daftar Siswa -->
     @if(session('role') === 'guru')
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Daftar Siswa Terdaftar
-                <span class="badge bg-primary">{{ $kelas->anggota->count() }} Siswa</span>
-            </h5>
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
-                <i class="bi bi-person-plus"></i> Tambah Siswa
-            </button>
+        <div class="d-flex justify-content-between align-items-center mb-3 gap-3 flex-wrap">
+            <div class="d-flex align-items-center gap-2">
+                <h5 class="mb-0">
+                    Daftar Siswa Terdaftar 
+                    <span class="badge bg-primary">{{ $kelas->anggota->count() }} Siswa</span>
+                </h5>
+            </div>
+            
+            <div class="d-flex gap-2 flex-wrap">
+                <!-- Form Pencarian -->
+                <form action="{{ route('kelas.anggota', $kelas->id) }}" method="GET" class="d-flex">
+                    <div class="input-group" style="min-width: 280px;">
+                        <input type="text" 
+                               name="search" 
+                               class="form-control" 
+                               placeholder="Cari nama atau NISN siswa..."
+                               value="{{ request('search') }}"
+                               aria-label="Search">
+                        <button class="btn btn-outline-secondary" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                        @if(request('search'))
+                            <a href="{{ route('kelas.anggota', $kelas->id) }}" class="btn btn-outline-danger" title="Hapus pencarian">
+                                <i class="bi bi-x-lg"></i>
+                            </a>
+                        @endif
+                    </div>
+                </form>
+
+                <!-- Tombol Tambah Siswa -->
+                <button class="btn btn-primary text-nowrap" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
+                    <i class="bi bi-person-plus"></i> Tambah Siswa
+                </button>
+            </div>
         </div>
+
+        <!-- Info Hasil Pencarian -->
+        @if(request('search'))
+            <div class="alert alert-info alert-dismissible fade show mb-3" role="alert">
+                <i class="bi bi-info-circle"></i>
+                Menampilkan hasil pencarian untuk: <strong>"{{ request('search') }}"</strong>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
     @else
-        <h5 class="mb-3">Daftar Siswa Terdaftar</h5>
+        <h5 class="mb-3">
+            Daftar Siswa Terdaftar 
+            <span class="badge bg-primary">{{ $kelas->anggota->count() }} Siswa</span>
+        </h5>
     @endif
 
     <!-- Daftar Siswa -->
     <div class="card border-0 shadow-sm">
         <div class="card-body p-0">
-            @if($kelas->anggota->count() > 0)
+            @if($anggota->count() > 0)
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead class="table-light">
@@ -78,13 +117,13 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($kelas->anggota as $index => $anggota)
+                            @foreach($anggota as $index => $item)
                             <tr>
                                 <td class="px-4">{{ $index + 1 }}</td>
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        @if($anggota->siswa && $anggota->siswa->foto)
-                                            <img src="{{ asset('storage/' . $anggota->siswa->foto) }}" 
+                                        @if($item->siswa && $item->siswa->foto)
+                                            <img src="{{ asset('storage/' . $item->siswa->foto) }}" 
                                                  alt="Foto" 
                                                  class="rounded-circle me-2" 
                                                  style="width: 35px; height: 35px; object-fit: cover;">
@@ -94,36 +133,37 @@
                                                 <i class="bi bi-person-fill"></i>
                                             </div>
                                         @endif
-                                        <span class="fw-semibold">{{ $anggota->siswa->nama ?? 'Nama tidak tersedia' }}</span>
+                                        <span class="fw-semibold">{{ $item->siswa->nama ?? 'Nama tidak tersedia' }}</span>
                                     </div>
                                 </td>
                                 <td>
                                     <small class="text-muted">
-                                        {{ $anggota->siswa->nipd ?? '-' }}
+                                        {{ $item->siswa->nipd ?? '-' }}
                                     </small>
                                 </td>
                                 <td>
                                     <small class="text-muted">
                                         <i class="bi bi-phone"></i> 
-                                        {{ $anggota->siswa->hp ?? '-' }}
+                                        {{ $item->siswa->hp ?? '-' }}
                                     </small>
                                 </td>
                                 <td>
                                     <small class="text-muted">
                                         <i class="bi bi-calendar-check"></i>
-                                        {{ \Carbon\Carbon::parse($anggota->joined_at)->format('d M Y') }}
+                                        {{ \Carbon\Carbon::parse($item->joined_at)->format('d M Y') }}
                                     </small>
                                 </td>
                                 @if(session('role') === 'guru')
                                 <td class="text-center">
-                                    <a href="{{ route('kelas.anggota.show', [$kelas->id, $anggota->id]) }}"
+
+                                    <a href="{{ route('kelas.anggota.show', [$kelas->id, $item->id]) }}"
                                     class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-eye"></i>
                                     </a>
 
                                     <button type="button" 
                                             class="btn btn-sm btn-outline-danger"
-                                            onclick="hapusAnggota({{ $anggota->id }}, '{{ addslashes($anggota->siswa->nama ?? 'Siswa') }}', {{ $kelas->id }})">
+                                            onclick="hapusAnggota({{ $item->id }}, '{{ addslashes($item->siswa->nama ?? 'Siswa') }}', {{ $kelas->id }})">
                                         <i class="bi bi-trash"></i>
                                     </button>
                                 </td>
@@ -135,14 +175,26 @@
                 </div>
             @else
                 <div class="text-center py-5">
-                    <i class="bi bi-people fs-1 text-muted"></i>
-                    <p class="text-secondary mt-3 mb-0">Belum ada siswa yang bergabung</p>
-                    <small class="text-muted">Bagikan kode kelas untuk mengundang siswa</small>
-                    @if(session('role') === 'guru')
+                    @if(request('search'))
+                        <!-- Jika sedang search tapi tidak ada hasil -->
+                        <i class="bi bi-search fs-1 text-muted"></i>
+                        <p class="text-secondary mt-3 mb-2">Tidak ada siswa ditemukan dengan kata kunci <strong>"{{ request('search') }}"</strong></p>
+                        <small class="text-muted">Coba gunakan kata kunci lain atau lihat semua siswa</small>
                         <br>
-                        <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
-                            <i class="bi bi-person-plus"></i> Tambah Siswa Pertama
-                        </button>
+                        <a href="{{ route('kelas.anggota', $kelas->id) }}" class="btn btn-outline-primary mt-3">
+                            <i class="bi bi-arrow-left"></i> Lihat Semua Siswa
+                        </a>
+                    @else
+                        <!-- Jika memang belum ada siswa -->
+                        <i class="bi bi-people fs-1 text-muted"></i>
+                        <p class="text-secondary mt-3 mb-0">Belum ada siswa yang bergabung</p>
+                        <small class="text-muted">Bagikan kode kelas untuk mengundang siswa</small>
+                        @if(session('role') === 'guru')
+                            <br>
+                            <button class="btn btn-primary mt-3" data-bs-toggle="modal" data-bs-target="#modalTambahSiswa">
+                                <i class="bi bi-person-plus"></i> Tambah Siswa Pertama
+                            </button>
+                        @endif
                     @endif
                 </div>
             @endif

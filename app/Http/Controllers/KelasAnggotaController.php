@@ -9,11 +9,47 @@ use Illuminate\Http\Request;
 
 class KelasAnggotaController extends Controller
 {
-    public function index()
-    {
-        $anggota = KelasAnggota::with(['kelas', 'siswa'])->get();
-        return view('kelas_anggota.index', compact('anggota'));
+   public function index($kelasId, Request $request)
+{
+    $kelas = Kelas::with(['guru', 'anggota.siswa'])->findOrFail($kelasId);
+
+    $query = KelasAnggota::where('kelas_id', $kelasId)
+        ->with('siswa');
+
+    // Filter pencarian
+    if ($request->has('search') && $request->search) {
+        $search = $request->search;
+
+        $query->whereHas('siswa', function ($q) use ($search) {
+            $q->where('nama', 'like', "%$search%")
+              ->orWhere('nisn', 'like', "%$search%")
+              ->orWhere('nipd', 'like', "%$search%");
+        });
     }
+
+    // Ambil semua hasil (atau bisa pagination jika banyak)
+    $anggota = $query->orderBy('joined_at', 'desc')->get();
+
+    // Cek role user
+    $userRole = session('role');
+    $identifier = session('identifier');
+
+    // GURU - hanya guru pemilik kelas
+    if ($userRole === 'guru' && $kelas->guru_nip === $identifier) {
+        return view('kelas.anggota.index', compact('kelas', 'anggota'));
+    }
+
+    // SISWA - hanya siswa yang terdaftar di kelas
+    if ($userRole === 'siswa') {
+        $isMember = $kelas->anggota()->where('siswa_nisn', $identifier)->exists();
+        
+        if ($isMember) {
+            return view('kelas.anggota.index', compact('kelas', 'anggota'));
+        }
+    }
+
+    return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman ini.');
+}
 
     public function create()
     {
