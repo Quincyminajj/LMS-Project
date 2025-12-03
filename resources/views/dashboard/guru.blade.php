@@ -76,21 +76,20 @@
             </div>
 
             <!-- Kelas Diarsipkan -->
-            <a href="{{ route('kelas.arsip') }}"
-                class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500 hover:shadow-lg transition cursor-pointer">
+            <div href="{{ route('kelas.arsip') }}"
+                class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500 transition cursor-default">
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-gray-500 text-sm mb-1">Kelas Diarsipkan</p>
                         <p class="text-3xl font-bold text-gray-800">{{ $kelasDiarsipkan }}</p>
                         <p class="text-xs text-yellow-600 mt-2">
-                            <i class="fas fa-arrow-right mr-1"></i>Klik untuk lihat
                         </p>
                     </div>
                     <div class="bg-yellow-100 p-4 rounded-lg">
                         <i class="fas fa-archive text-yellow-600 text-2xl"></i>
                     </div>
                 </div>
-            </a>
+            </div>
         </div>
 
         <!-- Kelas Section -->
