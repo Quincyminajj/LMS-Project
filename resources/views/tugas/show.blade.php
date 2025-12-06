@@ -93,10 +93,14 @@
                         @if ($tugas->file_contoh)
                             <div class="alert alert-light border">
                                 <i class="bi bi-paperclip"></i> <strong>File Lampiran:</strong>
-                                <a href="{{ asset('storage/' . $tugas->file_contoh) }}"
-                                    class="btn btn-sm btn-outline-primary ms-2" download>
-                                    <i class="bi bi-download"></i> Download File Contoh
-                                </a>
+                                  
+                                {{-- Tambahkan tombol preview jika file PDF --}}
+                                @if (pathinfo($tugas->file_contoh, PATHINFO_EXTENSION) === 'pdf')
+                                    <a href="{{ route('preview.file', $tugas->file_contoh) }}"
+                                        class="btn btn-sm btn-outline-success ms-2" target="_blank">
+                                        <i class="bi bi-eye"></i> Lihat File
+                                    </a>
+                                @endif
                             </div>
                         @endif
                     </div>

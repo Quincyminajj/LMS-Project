@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Tugas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TugasController extends Controller
 {
@@ -42,16 +43,24 @@ class TugasController extends Controller
             'judul' => 'required',
             'deskripsi' => 'required',
             'deadline' => 'required|date',
-            'nilai_maksimal' => 'nullable|numeric|min:0'
+            'nilai_maksimal' => 'nullable|numeric|min:0',
+            'file_contoh' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', 
         ]);
 
         try {
+            // Handle file upload jika ada
+            $fileContohPath = null;
+            if ($request->hasFile('file_contoh')) {
+                $fileContohPath = $request->file('file_contoh')->store('tugas_contoh', 'public');
+            }
+
             Tugas::create([
                 'kelas_id' => $kelas,
                 'judul' => $request->judul,
                 'deskripsi' => $request->deskripsi,
                 'deadline' => $request->deadline,
                 'nilai_maksimal' => $request->nilai_maksimal ?? 100,
+                'file_contoh' => $fileContohPath,
                 'created_by' => session('identifier'),
             ]);
 
@@ -67,17 +76,32 @@ class TugasController extends Controller
             'judul' => 'required',
             'deskripsi' => 'required',
             'deadline' => 'required|date',
-            'nilai_maksimal' => 'nullable|numeric|min:0'
+            'nilai_maksimal' => 'nullable|numeric|min:0',
+            'file_contoh' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // Max 5MB
         ]);
 
         try {
             $tugas = Tugas::findOrFail($id);
+
+            // Handle file upload jika ada file baru
+            $fileContohPath = $tugas->file_contoh; // Keep old file by default
+            
+            if ($request->hasFile('file_contoh')) {
+                // Hapus file lama jika ada
+                if ($tugas->file_contoh) {
+                    Storage::disk('public')->delete($tugas->file_contoh);
+                }
+                
+                // Upload file baru
+                $fileContohPath = $request->file('file_contoh')->store('tugas_contoh', 'public');
+            }
 
             $tugas->update([
                 'judul' => $request->judul,
                 'deskripsi' => $request->deskripsi,
                 'nilai_maksimal' => $request->nilai_maksimal ?? 100,
                 'deadline' => $request->deadline,
+                'file_contoh' => $fileContohPath,
             ]);
 
             return back()->with('success', 'Tugas berhasil diperbarui!');
@@ -90,6 +114,12 @@ class TugasController extends Controller
     {
         try {
             $tugas = Tugas::findOrFail($id);
+            
+            // Hapus file contoh jika ada
+            if ($tugas->file_contoh) {
+                Storage::disk('public')->delete($tugas->file_contoh);
+            }
+            
             $tugas->delete();
 
             return redirect()->route('tugas.index', $kelasId)
