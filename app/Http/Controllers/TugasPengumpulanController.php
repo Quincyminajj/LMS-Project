@@ -65,7 +65,7 @@ class TugasPengumpulanController extends Controller
         // Simpan data pengumpulan
         TugasPengumpulan::create([
             'tugas_id' => $validated['tugas_id'],
-            'siswa_nisn' => session('identifier'),  // ✅ PERBAIKI: Ubah dari siswa_nis ke siswa_nisn
+            'siswa_nisn' => session('identifier'),
             'jawaban' => $validated['jawaban'],
             'file_path' => $validated['file_path'] ?? null,
         ]);

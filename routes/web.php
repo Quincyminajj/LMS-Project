@@ -11,6 +11,7 @@ use App\Http\Controllers\TugasPengumpulanController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\ForumKomentarController;
 use App\Http\Controllers\SiswaKelasController;
+use App\Http\Controllers\FileController;
 
 Route::get('/', [LoginController::class, 'showLoginForm'])->name('home');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
@@ -68,7 +69,7 @@ Route::middleware('auth.custom')->group(function () {
 
     // Tugas Pengumpulan (Siswa)
     Route::post('/tugas/{tugas_id}/submit', [TugasPengumpulanController::class, 'store'])->name('tugas.submit');
-
+    Route::get('/preview/{path}', [FileController::class, 'preview'])->name('preview.file')->where('path', '.*');    
     // Tugas Penilaian (Guru)
     Route::put('/tugaspengumpulan/{id}', [TugasPengumpulanController::class, 'update'])->name('tugaspengumpulan.update');
     Route::delete('/tugaspengumpulan/{id}', [TugasPengumpulanController::class, 'destroy'])->name('tugaspengumpulan.destroy');

@@ -142,12 +142,17 @@
                                     <strong>Jawaban Anda:</strong>
                                     <p class="mb-2 mt-2">{{ $pengumpulan->jawaban }}</p>
 
-                                    @if ($pengumpulan->file_path)
-                                        <a href="{{ asset('storage/' . $pengumpulan->file_path) }}"
-                                            class="btn btn-sm btn-outline-primary" download>
-                                            <i class="bi bi-download"></i> Download File Pengumpulan
-                                        </a>
-                                    @endif
+                                @if ($pengumpulan->file_path)
+                                    <a href="{{ asset('storage/' . $pengumpulan->file_path) }}"
+                                        class="btn btn-sm btn-outline-primary" download>
+                                        <i class="bi bi-download"></i> Download File Pengumpulan
+                                    </a>
+
+                                    <a href="{{ route('preview.file', $pengumpulan->file_path) }}"
+                                        class="btn btn-sm btn-outline-success" target="_blank">
+                                        <i class="bi bi-eye"></i> Lihat File
+                                    </a>
+                                @endif
                                 </div>
 
                                 @if ($pengumpulan->catatan_guru)
@@ -201,10 +206,10 @@
                                 <div class="border rounded p-3 mb-3">
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div>
-                                            <h6 class="fw-bold mb-1">{{ $p->siswa->nama_siswa ?? 'Siswa' }}</h6>
+                                            <h6 class="fw-bold mb-1">{{ $p->siswa->nama ?? 'Siswa' }}</h6>
                                             <small class="text-muted">
-                                                NIS: {{ $p->siswa_nisn }} •
-                                                Dikumpulkan: {{ $p->created_at->format('d M Y, H:i') }}
+                                                    NIPD: {{ $p->siswa->nipd ?? '-' }} •
+                                                    Dikumpulkan: {{ $p->created_at->format('d M Y, H:i') }}
                                             </small>
                                         </div>
                                         <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
@@ -221,6 +226,10 @@
                                             <a href="{{ asset('storage/' . $p->file_path) }}"
                                                 class="btn btn-sm btn-outline-secondary mb-2" download>
                                                 <i class="bi bi-download"></i> Download File
+                                            </a>
+                                            <a href="{{ route('preview.file', $p->file_path) }}"
+                                                class="btn btn-sm btn-outline-success mb-2" target="_blank">
+                                                <i class="bi bi-eye"></i> Lihat File
                                             </a>
                                         @endif
 
