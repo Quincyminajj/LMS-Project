@@ -57,7 +57,7 @@ class KelasKontenController extends Controller
             $link = trim($request->input('link_url'));
 
             // Debug: Log link yang diterima
-            \Log::info('Link received: ' . $link);
+            Log::info('Link received: ' . $link);
 
             // Pastikan link tidak kosong
             if (empty($link)) {
@@ -70,7 +70,7 @@ class KelasKontenController extends Controller
             }
 
             // Debug: Log link setelah diproses
-            \Log::info('Link processed: ' . $link);
+            Log::info('Link processed: ' . $link);
 
             $data['isi'] = $link;
             $data['file_path'] = null;
@@ -86,7 +86,7 @@ class KelasKontenController extends Controller
             $konten = KelasKonten::create($data);
 
             // Debug: Log data yang disimpan
-            \Log::info('Data saved:', $data);
+            Log::info('Data saved:', $data);
 
             return back()->with('success', 'Konten berhasil ditambahkan!');
         } catch (\Exception $e) {
