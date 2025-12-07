@@ -32,14 +32,14 @@
                                     </button>
                                     <ul class="dropdown-menu">
                                         <li>
-                                            <form id="delete-forum-{{ $forum->id }}" 
-                                                action="{{ route('forum.destroy', $forum->id) }}" 
-                                                method="POST" style="display:none;">
+                                            <form id="delete-forum-{{ $forum->id }}"
+                                                action="{{ route('forum.destroy', $forum->id) }}" method="POST"
+                                                style="display:none;">
                                                 @csrf @method('DELETE')
                                             </form>
 
-                                            <button type="button" class="dropdown-item text-danger" 
-                                                    onclick="confirmDeleteForum({{ $forum->id }})">
+                                            <button type="button" class="dropdown-item text-danger"
+                                                onclick="confirmDeleteForum({{ $forum->id }})">
                                                 Hapus Diskusi
                                             </button>
                                         </li>
@@ -49,7 +49,16 @@
                         </div>
 
                         <div class="border-top pt-3">
-                            <p class="mb-0">{{ $forum->isi }}</p>
+                            <p class="mb-3">{{ $forum->isi }}</p>
+
+                            <!-- Tampilkan Gambar jika ada -->
+                            @if ($forum->gambar)
+                                <div class="mt-3">
+                                    <img src="{{ asset('storage/forum_images/' . $forum->gambar) }}" alt="Forum Image"
+                                        class="img-fluid rounded shadow-sm" style="max-width: 100%; cursor: pointer;"
+                                        onclick="openImageModal(this.src)">
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -158,25 +167,46 @@
                         </div>
                     </div>
                 </div>
-                    <script>
-                    function confirmDeleteForum(id) {
-                        Swal.fire({
-                            title: 'Hapus Diskusi?',
-                            text: "Aksi ini tidak dapat dibatalkan!",
-                            icon: 'warning',
-                            showCancelButton: true,
-                            confirmButtonText: 'Ya, Hapus!',
-                            cancelButtonText: 'Batal',
-                            confirmButtonColor: '#d33',
-                            cancelButtonColor: '#3085d6'
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                document.getElementById(`delete-forum-${id}`).submit();
-                            }
-                        });
-                    }
-                    </script>
             </div>
         </div>
     </div>
+
+    <!-- Modal untuk melihat gambar -->
+    <div class="modal fade" id="imageModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <img id="modalImage" src="" alt="Full Image" class="img-fluid w-100">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmDeleteForum(id) {
+            Swal.fire({
+                title: 'Hapus Diskusi?',
+                text: "Aksi ini tidak dapat dibatalkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`delete-forum-${id}`).submit();
+                }
+            });
+        }
+
+        function openImageModal(src) {
+            document.getElementById('modalImage').src = src;
+            const modal = new bootstrap.Modal(document.getElementById('imageModal'));
+            modal.show();
+        }
+    </script>
 @endsection

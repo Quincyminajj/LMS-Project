@@ -65,44 +65,62 @@
                 <div class="col-12">
                     <div class="card shadow-sm border-0">
                         <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <div class="flex-grow-1">
-                                    <h6 class="fw-bold mb-1">{{ $forum->judul }}</h6>
-                                    <p class="text-secondary mb-2">{{ Str::limit($forum->isi, 150) }}</p>
-                                    <small class="text-muted">
-                                        <i class="bi bi-person-circle"></i> {{ $forum->dibuat_oleh }} •
-                                        <i class="bi bi-clock"></i> {{ $forum->created_at->diffForHumans() }} •
-                                        <i class="bi bi-chat"></i> {{ $forum->komentars->count() }} komentar
-                                    </small>
-                                </div>
-
-                                @if (session('role') === 'guru' && session('identifier') === $kelas->guru_nip)
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu">
-                                            <li>
-                                                <form id="delete-form-{{ $forum->id }}" 
-                                                    action="{{ route('forum.destroy', $forum->id) }}"
-                                                    method="POST" style="display:none;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                </form>
-
-                                                <button type="button" class="dropdown-item text-danger"
-                                                        onclick="confirmDeleteForum({{ $forum->id }})">
-                                                    Hapus Diskusi
-                                                </button>
-                                            </li>
-                                        </ul>
+                            <div class="d-flex gap-3">
+                                <!-- Thumbnail Gambar jika ada -->
+                                @if ($forum->gambar)
+                                    <div class="flex-shrink-0">
+                                        <img src="{{ asset('storage/forum_images/' . $forum->gambar) }}"
+                                            alt="Forum thumbnail" class="rounded"
+                                            style="width: 100px; height: 100px; object-fit: cover;">
                                     </div>
                                 @endif
-                            </div>
 
-                            <a href="{{ route('forum.show', $forum->id) }}" class="btn btn-outline-primary btn-sm">
-                                <i class="bi bi-eye"></i> Lihat Diskusi
-                            </a>
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="flex-grow-1">
+                                            <h6 class="fw-bold mb-1">
+                                                {{ $forum->judul }}
+                                                @if ($forum->gambar)
+                                                    <i class="bi bi-image text-primary ms-1"></i>
+                                                @endif
+                                            </h6>
+                                            <p class="text-secondary mb-2">{{ Str::limit($forum->isi, 150) }}</p>
+                                            <small class="text-muted">
+                                                <i class="bi bi-person-circle"></i> {{ $forum->dibuat_oleh }} •
+                                                <i class="bi bi-clock"></i> {{ $forum->created_at->diffForHumans() }} •
+                                                <i class="bi bi-chat"></i> {{ $forum->komentars->count() }} komentar
+                                            </small>
+                                        </div>
+
+                                        @if (session('role') === 'guru' && session('identifier') === $kelas->guru_nip)
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-light" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-three-dots-vertical"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li>
+                                                        <form id="delete-form-{{ $forum->id }}"
+                                                            action="{{ route('forum.destroy', $forum->id) }}"
+                                                            method="POST" style="display:none;">
+                                                            @csrf
+                                                            @method('DELETE')
+                                                        </form>
+
+                                                        <button type="button" class="dropdown-item text-danger"
+                                                            onclick="confirmDeleteForum({{ $forum->id }})">
+                                                            Hapus Diskusi
+                                                        </button>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        @endif
+                                    </div>
+
+                                    <a href="{{ route('forum.show', $forum->id) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye"></i> Lihat Diskusi
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -118,25 +136,25 @@
                     </div>
                 </div>
             @endforelse
-                <script>
-                        function confirmDeleteForum(id) {
-                            Swal.fire({
-                                title: 'Hapus Diskusi?',
-                                text: "Aksi ini tidak dapat dibatalkan!",
-                                icon: 'warning',
-                                showCancelButton: true,
-                                confirmButtonText: 'Ya, Hapus!',
-                                cancelButtonText: 'Batal',
-                                confirmButtonColor: '#d33',
-                                cancelButtonColor: '#3085d6'
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    document.getElementById(`delete-form-${id}`).submit();
-                                }
-                            });
-                        }
-            </script>
         </div>
     </div>
-</div>
+
+    <script>
+        function confirmDeleteForum(id) {
+            Swal.fire({
+                title: 'Hapus Diskusi?',
+                text: "Aksi ini tidak dapat dibatalkan!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Hapus!',
+                cancelButtonText: 'Batal',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById(`delete-form-${id}`).submit();
+                }
+            });
+        }
+    </script>
 @endsection

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Forum;
 use App\Models\Kelas;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ForumController extends Controller
 {
@@ -41,10 +42,19 @@ class ForumController extends Controller
             'kelas_id' => 'required|exists:kelas,id',
             'judul' => 'required|string|max:255',
             'isi' => 'required|string',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Max 2MB
         ]);
 
         // Ambil nama user dari session
         $validated['dibuat_oleh'] = session('user_name') ?? session('identifier');
+
+        // Handle upload gambar
+        if ($request->hasFile('gambar')) {
+            $gambar = $request->file('gambar');
+            $namaFile = time() . '_' . $gambar->getClientOriginalName();
+            $gambar->storeAs('public/forum_images', $namaFile);
+            $validated['gambar'] = $namaFile;
+        }
 
         $forum = Forum::create($validated);
 
@@ -64,7 +74,21 @@ class ForumController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'isi' => 'required|string',
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
+
+        // Handle upload gambar baru
+        if ($request->hasFile('gambar')) {
+            // Hapus gambar lama jika ada
+            if ($forum->gambar && Storage::exists('public/forum_images/' . $forum->gambar)) {
+                Storage::delete('public/forum_images/' . $forum->gambar);
+            }
+
+            $gambar = $request->file('gambar');
+            $namaFile = time() . '_' . $gambar->getClientOriginalName();
+            $gambar->storeAs('public/forum_images', $namaFile);
+            $validated['gambar'] = $namaFile;
+        }
 
         $forum->update($validated);
 
@@ -75,6 +99,12 @@ class ForumController extends Controller
     {
         $forum = Forum::findOrFail($id);
         $kelas_id = $forum->kelas_id;
+
+        // Hapus gambar jika ada
+        if ($forum->gambar && Storage::exists('public/forum_images/' . $forum->gambar)) {
+            Storage::delete('public/forum_images/' . $forum->gambar);
+        }
+
         $forum->delete();
 
         return redirect()->route('kelas.forum', $kelas_id)->with('success', 'Forum berhasil dihapus');

@@ -16,9 +16,10 @@ class Forum extends Model
         'judul',
         'isi',
         'dibuat_oleh',
+        'gambar', // Tambahkan ini
     ];
 
-    // Relasi ke kelas (asumsi ada model Kelas)
+    // Relasi ke kelas
     public function kelas()
     {
         return $this->belongsTo(Kelas::class);
