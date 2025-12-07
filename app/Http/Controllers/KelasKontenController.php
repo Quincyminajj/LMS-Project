@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\KelasKonten;
 use App\Models\Kelas;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class KelasKontenController extends Controller
 {
@@ -18,12 +19,12 @@ class KelasKontenController extends Controller
         $validated = $request->validate([
             'judul' => 'required|string|max:255',
             'tipe' => 'required|in:file,link,teks',
-            'isi' => 'nullable|string',
+            'link_url' => 'nullable|string',
+            'text_content' => 'nullable|string',
             'file_path' => 'required_if:tipe,file|nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,zip,rar|max:10240',
         ], [
             'judul.required' => 'Judul konten wajib diisi',
             'tipe.required' => 'Tipe konten wajib dipilih',
-            'isi.required_if' => 'Link atau teks wajib diisi',
             'file_path.required_if' => 'File wajib diupload',
             'file_path.mimes' => 'Format file tidak didukung',
             'file_path.max' => 'Ukuran file maksimal 10MB',
@@ -52,26 +53,41 @@ class KelasKontenController extends Controller
 
         } elseif ($validated['tipe'] === 'link') {
 
-            // Format URL link - tambahkan https:// jika tidak ada protokol
-            $link = trim($validated['isi']);
+            // Ambil link dari input dengan name baru
+            $link = trim($request->input('link_url'));
+
+            // Debug: Log link yang diterima
+            \Log::info('Link received: ' . $link);
+
+            // Pastikan link tidak kosong
+            if (empty($link)) {
+                return back()->with('error', 'Link tidak boleh kosong!')->withInput();
+            }
 
             // Cek apakah sudah ada protokol http:// atau https://
             if (!preg_match('/^https?:\/\//i', $link)) {
                 $link = 'https://' . $link;
             }
 
+            // Debug: Log link setelah diproses
+            \Log::info('Link processed: ' . $link);
+
             $data['isi'] = $link;
             $data['file_path'] = null;
         } elseif ($validated['tipe'] === 'teks') {
 
-            // Simpan teks biasa
-            $data['isi'] = $validated['isi'];
+            // Simpan teks biasa dengan name baru
+            $data['isi'] = $request->input('text_content');
             $data['file_path'] = null;
         }
 
         // Simpan ke database
         try {
-            KelasKonten::create($data);
+            $konten = KelasKonten::create($data);
+
+            // Debug: Log data yang disimpan
+            \Log::info('Data saved:', $data);
+
             return back()->with('success', 'Konten berhasil ditambahkan!');
         } catch (\Exception $e) {
             return back()->with('error', 'Gagal menambahkan konten: ' . $e->getMessage());
@@ -91,6 +107,17 @@ class KelasKontenController extends Controller
                 'judul' => 'required|string|max:255',
                 'isi' => 'nullable|string',
             ]);
+
+            // Jika tipe link, proses link
+            if ($konten->tipe === 'link' && !empty($validated['isi'])) {
+                $link = trim($validated['isi']);
+
+                if (!preg_match('/^https?:\/\//i', $link)) {
+                    $link = 'https://' . $link;
+                }
+
+                $validated['isi'] = $link;
+            }
 
             // Update data
             $konten->update([

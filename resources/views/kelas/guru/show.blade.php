@@ -32,27 +32,35 @@
                                         <i class="bi bi-pencil"></i> Edit Kelas
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form id="arsip-kelas-{{ $kelas->id }}" action="{{ route('kelas.archive', $kelas->id) }}" method="POST" style="display:none;">
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form id="arsip-kelas-{{ $kelas->id }}"
+                                        action="{{ route('kelas.archive', $kelas->id) }}" method="POST"
+                                        style="display:none;">
                                         @csrf
                                         @method('PUT')
                                     </form>
 
                                     <button type="button" class="dropdown-item text-warning"
-                                            onclick="confirmAction({{ $kelas->id }}, 'arsip-kelas')">
+                                        onclick="confirmAction({{ $kelas->id }}, 'arsip-kelas')">
                                         <i class="bi bi-archive"></i> Arsipkan Kelas
                                     </button>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form id="hapus-kelas-{{ $kelas->id }}" action="{{ route('kelas.destroy', $kelas->id) }}" method="POST" style="display:none;">
+                                    <hr class="dropdown-divider">
+                                </li>
+                                <li>
+                                    <form id="hapus-kelas-{{ $kelas->id }}"
+                                        action="{{ route('kelas.destroy', $kelas->id) }}" method="POST"
+                                        style="display:none;">
                                         @csrf
                                         @method('DELETE')
                                     </form>
 
                                     <button type="button" class="dropdown-item text-danger"
-                                            onclick="confirmAction({{ $kelas->id }}, 'hapus-kelas')">
+                                        onclick="confirmAction({{ $kelas->id }}, 'hapus-kelas')">
                                         <i class="bi bi-trash"></i> Hapus Permanen
                                     </button>
                                 </li>
@@ -81,7 +89,7 @@
                 <a class="nav-link {{ request()->is('kelas/*/forum') ? 'active' : '' }}"
                     href="{{ route('kelas.forum', $kelas->id) }}">
                     <i class="bi bi-chat-dots"></i> Forum
-                </a>    
+                </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->is('kelas/*/anggota') ? 'active' : '' }}"
@@ -129,13 +137,15 @@
                                                 <li><a class="dropdown-item" href="#" data-bs-toggle="modal"
                                                         data-bs-target="#modalEditKonten{{ $konten->id }}">Edit</a></li>
                                                 <li>
-                                                    <form id="hapus-konten-{{ $konten->id }}" action="{{ route('konten.destroy', $konten->id) }}" method="POST" style="display:none;">
+                                                    <form id="hapus-konten-{{ $konten->id }}"
+                                                        action="{{ route('konten.destroy', $konten->id) }}" method="POST"
+                                                        style="display:none;">
                                                         @csrf
                                                         @method('DELETE')
                                                     </form>
 
                                                     <button type="button" class="dropdown-item text-danger"
-                                                            onclick="confirmAction({{ $konten->id }}, 'hapus-konten')">
+                                                        onclick="confirmAction({{ $konten->id }}, 'hapus-konten')">
                                                         Hapus Konten
                                                     </button>
                                                 </li>
@@ -145,7 +155,16 @@
                                 </div>
 
                                 <h6 class="fw-bold mb-2">{{ $konten->judul }}</h6>
-                                <p class="text-secondary small mb-3">{{ Str::limit($konten->isi, 100) }}</p>
+
+                                @if ($konten->tipe == 'file')
+                                    <p class="text-secondary small mb-3">{{ Str::limit($konten->isi, 50) }}</p>
+                                @elseif($konten->tipe == 'link')
+                                    <p class="text-secondary small mb-3 text-truncate">
+                                        <i class="bi bi-link-45deg"></i> {{ $konten->isi }}
+                                    </p>
+                                @else
+                                    <p class="text-secondary small mb-3">{{ Str::limit($konten->isi, 100) }}</p>
+                                @endif
 
                                 <div class="d-flex justify-content-between align-items-center">
                                     @if ($konten->tipe == 'file')
@@ -157,6 +176,11 @@
                                         <a href="{{ $konten->isi }}" target="_blank" class="btn btn-primary btn-sm">
                                             <i class="bi bi-box-arrow-up-right"></i> Buka Link
                                         </a>
+                                    @else
+                                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#viewTextModal{{ $konten->id }}">
+                                            <i class="bi bi-eye"></i> Lihat Detail
+                                        </button>
                                     @endif
 
                                     <small class="text-muted">{{ $konten->created_at->format('d M Y') }}</small>
@@ -164,6 +188,32 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Modal View Text Content -->
+                    @if ($konten->tipe == 'teks')
+                        <div class="modal fade" id="viewTextModal{{ $konten->id }}" tabindex="-1">
+                            <div class="modal-dialog modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">{{ $konten->judul }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted small mb-2">
+                                            <i class="bi bi-calendar"></i> {{ $konten->created_at->format('d M Y, H:i') }}
+                                        </p>
+                                        <div class="border-top pt-3">
+                                            <p style="white-space: pre-wrap;">{{ $konten->isi }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-bs-dismiss="modal">Tutup</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
 
                     <!-- Modal Edit Konten (Only for Guru) -->
                     @if (session('role') === 'guru' && session('identifier') === $kelas->guru_nip)
@@ -191,8 +241,8 @@
                                             @elseif($konten->tipe == 'link')
                                                 <div class="mb-3">
                                                     <label class="form-label">Link</label>
-                                                    <input type="url" name="isi" class="form-control"
-                                                        value="{{ $konten->isi }}">
+                                                    <input type="text" name="isi" class="form-control"
+                                                        value="{{ $konten->isi }}" placeholder="https://example.com">
                                                 </div>
                                             @endif
                                         </div>
@@ -260,20 +310,23 @@
                             <!-- File Upload -->
                             <div id="fileUploadField" class="mb-3 d-none">
                                 <label class="form-label fw-semibold">Upload File *</label>
-                                <input type="file" name="file_path" class="form-control">
+                                <input type="file" name="file_path" class="form-control" id="fileInput">
+                                <small class="text-muted">Format: PDF, Word, PPT, Excel, Gambar (Max 10MB)</small>
                             </div>
 
                             <!-- Link -->
                             <div id="linkField" class="mb-3 d-none">
                                 <label class="form-label fw-semibold">Masukkan Link *</label>
-                                <input type="text" name="isi" class="form-control"
-                                    placeholder="https://example.com">
+                                <input type="text" name="link_url" class="form-control" id="linkInput"
+                                    placeholder="https://www.youtube.com/watch?v=xxxxx">
+                                <small class="text-muted">Contoh: www.youtube.com atau https://example.com</small>
                             </div>
 
                             <!-- Text -->
                             <div id="textField" class="mb-3 d-none">
                                 <label class="form-label fw-semibold">Deskripsi *</label>
-                                <textarea name="isi" class="form-control" rows="4" placeholder="Deskripsi konten"></textarea>
+                                <textarea name="text_content" class="form-control" rows="4" id="textInput"
+                                    placeholder="Tulis konten teks di sini..."></textarea>
                             </div>
                         </div>
 
@@ -290,14 +343,45 @@
             document.getElementById('tipeKonten').addEventListener('change', function() {
                 let tipe = this.value;
 
+                // Hide all fields first
                 document.getElementById('fileUploadField').classList.add('d-none');
                 document.getElementById('linkField').classList.add('d-none');
                 document.getElementById('textField').classList.add('d-none');
 
-                if (tipe === 'file') document.getElementById('fileUploadField').classList.remove('d-none');
-                if (tipe === 'link') document.getElementById('linkField').classList.remove('d-none');
-                if (tipe === 'teks') document.getElementById('textField').classList.remove('d-none');
+                // Clear and disable hidden fields
+                const fileInput = document.getElementById('fileInput');
+                const linkInput = document.getElementById('linkInput');
+                const textInput = document.getElementById('textInput');
+
+                // Reset all inputs
+                if (fileInput) {
+                    fileInput.value = '';
+                    fileInput.removeAttribute('required');
+                }
+                if (linkInput) {
+                    linkInput.value = '';
+                    linkInput.removeAttribute('required');
+                }
+                if (textInput) {
+                    textInput.value = '';
+                    textInput.removeAttribute('required');
+                }
+
+                // Show and require the appropriate field
+                if (tipe === 'file') {
+                    document.getElementById('fileUploadField').classList.remove('d-none');
+                    if (fileInput) fileInput.setAttribute('required', 'required');
+                }
+                if (tipe === 'link') {
+                    document.getElementById('linkField').classList.remove('d-none');
+                    if (linkInput) linkInput.setAttribute('required', 'required');
+                }
+                if (tipe === 'teks') {
+                    document.getElementById('textField').classList.remove('d-none');
+                    if (textInput) textInput.setAttribute('required', 'required');
+                }
             });
+
             function copyKodeKelas() {
                 const kode = document.getElementById('kodeKelasText').innerText;
 
@@ -314,51 +398,51 @@
             }
         </script>
         <script>
-        function confirmAction(id, action) {
+            function confirmAction(id, action) {
 
-            let title = '';
-            let text = '';
-            let confirmText = '';
-            let color = '#d33'; // default merah untuk hapus
+                let title = '';
+                let text = '';
+                let confirmText = '';
+                let color = '#d33'; // default merah untuk hapus
 
-            switch(action) {
-                case 'hapus-kelas':
-                    title = 'Hapus Kelas?';
-                    text = 'Kelas dan semua data terkait akan dihapus permanen!';
-                    confirmText = 'Ya, Hapus!';
-                    color = '#d33';
-                    break;
+                switch (action) {
+                    case 'hapus-kelas':
+                        title = 'Hapus Kelas?';
+                        text = 'Kelas dan semua data terkait akan dihapus permanen!';
+                        confirmText = 'Ya, Hapus!';
+                        color = '#d33';
+                        break;
 
-                case 'arsip-kelas':
-                    title = 'Arsipkan Kelas?';
-                    text = 'Kelas akan dipindahkan ke arsip dan tidak muncul di daftar aktif.';
-                    confirmText = 'Arsipkan!';
-                    color = '#f0ad4e'; // kuning untuk arsip
-                    break;
+                    case 'arsip-kelas':
+                        title = 'Arsipkan Kelas?';
+                        text = 'Kelas akan dipindahkan ke arsip dan tidak muncul di daftar aktif.';
+                        confirmText = 'Arsipkan!';
+                        color = '#f0ad4e'; // kuning untuk arsip
+                        break;
 
-                case 'hapus-konten':
-                    title = 'Hapus Konten?';
-                    text = 'Konten ini akan dihapus secara permanen!';
-                    confirmText = 'Ya, Hapus!';
-                    color = '#d33';
-                    break;
-            }
-
-            Swal.fire({
-                title: title,
-                text: text,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: color,
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: confirmText,
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById(`${action}-${id}`).submit();
+                    case 'hapus-konten':
+                        title = 'Hapus Konten?';
+                        text = 'Konten ini akan dihapus secara permanen!';
+                        confirmText = 'Ya, Hapus!';
+                        color = '#d33';
+                        break;
                 }
-            })
-        }
+
+                Swal.fire({
+                    title: title,
+                    text: text,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: color,
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: confirmText,
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        document.getElementById(`${action}-${id}`).submit();
+                    }
+                })
+            }
         </script>
     @endsection
 @endif
