@@ -35,55 +35,33 @@
                 <div class="flex items-center space-x-2 sm:space-x-3">
                     <i class="fas fa-book text-xl sm:text-2xl"></i>
                     <div>
-                        <span class="d-none d-sm-inline">LMS Diponegoro</span>
-                        <span class="d-inline d-sm-none">LMS</span>
+                        <span class="text-xl font-bold">LMS Diponegoro</span>
                         <p class="text-xs sm:text-sm text-blue-100">Portal Pembelajaran</p>
                     </div>
                 </div>
-
-                <!-- User Info & Actions - Responsive -->
-                <div class="flex items-center space-x-2 sm:space-x-4">
-                    <!-- User Info - Hide details on mobile, show on tablet+ -->
-                    <div class="hidden md:block text-right">
-                        @auth
-                            <p class="font-semibold text-sm">{{ session('user_name', Auth::user()->name ?? 'User') }}</p>
-                            <p class="text-xs text-blue-100">
-                                @if(session('user_role') == 'guru')
-                                    NIP: {{ session('identifier', '-') }}
-                                @elseif(session('user_role') == 'siswa')
-                                    NIS: {{ session('identifier', '-') }}
-                                @else
-                                    {{ ucfirst(session('user_role', 'User')) }}
-                                @endif
-                            </p>
-                        @endauth
+              <!-- User Info & Logout -->
+                <div class="flex items-center space-x-3 sm:space-x-4">
+                    <div class="text-right hidden sm:block min-w-[120px]">
+                        <p class="font-semibold text-sm sm:text-base whitespace-nowrap">{{ session('user_name') }}</p>
+                        <p class="text-xs sm:text-sm text-blue-100 whitespace-nowrap">
+                            @if(session('user_role') == 'guru')
+                                NIP: {{ session('identifier') }}
+                            @elseif(session('user_role') == 'siswa')
+                                NIS: {{ session('identifier') }}
+                            @else
+                                {{ session('identifier') }}
+                            @endif
+                        </p>
                     </div>
-
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center text-base sm:text-lg font-bold flex-shrink-0">
+                        {{ substr(session('user_name'), 0, 1) }}
+                    </div>
                     <!-- Logout Button -->
-                    <button type="button" 
-                            class="text-white hover:text-blue-200 transition p-2" 
-                            id="logoutButton"
-                            title="Logout">
-                        <i class="fas fa-sign-out-alt text-lg sm:text-xl"></i>
-                    </button>
-                    
+                    <a href="#" class="text-white hover:text-blue-200 flex-shrink-0 text-lg sm:text-xl" id="logoutButton">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </a>
                     <form id="logoutForm" action="{{ route('logout') }}" method="GET" class="hidden"></form>
-                </div>
-            </div>
-
-            <!-- Mobile User Info - Show only on mobile -->
-                @auth
-                    <p class="text-sm font-semibold">{{ session('user_name', Auth::user()->name ?? 'User') }}</p>
-                    <p class="text-xs text-blue-100">
-                        @if(session('user_role') == 'guru')
-                            NIP: {{ session('identifier', '-') }}
-                        @elseif(session('user_role') == 'siswa')
-                            NIS: {{ session('identifier', '-') }}
-                        @else
-                            {{ ucfirst(session('user_role', 'User')) }}
-                        @endif
-                    </p>
-                @endauth
+                </div>  
             </div>
         </div>
     </header>
