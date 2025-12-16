@@ -258,6 +258,68 @@
                                                     <textarea name="deskripsi" class="form-control" rows="3" 
                                                         placeholder="Tambahkan deskripsi untuk file ini...">{{ $konten->deskripsi }}</textarea>
                                                 </div>
+
+                                                <!-- File yang Ada Saat Ini -->
+                                                <div class="mb-3">
+                                                    <label class="form-label">File Saat Ini</label>
+                                                    <div class="alert alert-info d-flex align-items-center gap-2 mb-0">
+                                                        <i class="bi bi-file-earmark-fill"></i>
+                                                        <span class="flex-grow-1">{{ $konten->isi }}</span>
+                                                        </a>
+                                                    </div>
+                                                </div>
+
+                                                <!-- Replace File -->
+                                                <div class="mb-3">
+                                                    <label class="form-label">Ganti File (Opsional)</label>
+                                                    <input type="file" name="file_path" class="form-control" 
+                                                           id="replaceFile{{ $konten->id }}"
+                                                           onchange="previewFileName{{ $konten->id }}(this)">
+                                                    <small class="text-muted d-block mt-1">
+                                                        Format: PDF, Word, PPT, Excel, Gambar (Max 10MB)
+                                                    </small>
+                                                    <small class="text-info d-block mt-1">
+                                                        <i class="bi bi-info-circle"></i> Biarkan kosong jika tidak ingin mengganti file
+                                                    </small>
+                                                    
+                                                    <!-- Preview file baru yang dipilih -->
+                                                    <div id="newFilePreview{{ $konten->id }}" class="mt-2 d-none">
+                                                        <div class="alert alert-success d-flex align-items-center gap-2 mb-0">
+                                                            <i class="bi bi-file-earmark-arrow-up-fill"></i>
+                                                            <span class="flex-grow-1" id="newFileName{{ $konten->id }}"></span>
+                                                            <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                                    onclick="cancelFileReplace{{ $konten->id }}()">
+                                                                <i class="bi bi-x"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <script>
+                                                    function previewFileName{{ $konten->id }}(input) {
+                                                        const preview = document.getElementById('newFilePreview{{ $konten->id }}');
+                                                        const fileName = document.getElementById('newFileName{{ $konten->id }}');
+                                                        
+                                                        if (input.files.length > 0) {
+                                                            const file = input.files[0];
+                                                            const fileSize = (file.size / 1024 / 1024).toFixed(2);
+                                                            
+                                                            fileName.textContent = `${file.name} (${fileSize} MB)`;
+                                                            preview.classList.remove('d-none');
+                                                        } else {
+                                                            preview.classList.add('d-none');
+                                                        }
+                                                    }
+
+                                                    function cancelFileReplace{{ $konten->id }}() {
+                                                        const fileInput = document.getElementById('replaceFile{{ $konten->id }}');
+                                                        const preview = document.getElementById('newFilePreview{{ $konten->id }}');
+                                                        
+                                                        fileInput.value = '';
+                                                        preview.classList.add('d-none');
+                                                    }
+                                                </script>
+
                                             @elseif($konten->tipe == 'link')
                                                 <div class="mb-3">
                                                     <label class="form-label">Link</label>

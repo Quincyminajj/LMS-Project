@@ -109,28 +109,64 @@ class KelasKontenController extends Controller
                 'judul' => 'required|string|max:255',
                 'isi' => 'nullable|string',
                 'deskripsi' => 'nullable|string',
+                'file_path' => 'nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,zip,rar|max:10240',
+            ], [
+                'file_path.mimes' => 'Format file tidak didukung',
+                'file_path.max' => 'Ukuran file maksimal 10MB',
             ]);
 
-            // Jika tipe link, proses link
-            if ($konten->tipe === 'link' && !empty($validated['isi'])) {
-                $link = trim($validated['isi']);
+            // Update judul dan deskripsi
+            $konten->judul = $validated['judul'];
+            $konten->deskripsi = $validated['deskripsi'] ?? $konten->deskripsi;
 
-                if (!preg_match('/^https?:\/\//i', $link)) {
-                    $link = 'https://' . $link;
+            // Handle berdasarkan tipe konten
+            if ($konten->tipe === 'file') {
+                // Jika ada file baru untuk di-replace
+                if ($request->hasFile('file_path')) {
+                    // Hapus file lama dari storage
+                    if ($konten->file_path && Storage::disk('public')->exists($konten->file_path)) {
+                        Storage::disk('public')->delete($konten->file_path);
+                        Log::info('Old file deleted: ' . $konten->file_path);
+                    }
+
+                    // Upload file baru
+                    $file = $request->file('file_path');
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $filePath = $file->storeAs('materi_kelas', $fileName, 'public');
+
+                    // Update data file
+                    $konten->file_path = $filePath;
+                    $konten->isi = $file->getClientOriginalName();
+
+                    Log::info('New file uploaded: ' . $filePath);
+                }
+                // Jika tidak ada file baru, data file tetap sama (tidak berubah)
+
+            } elseif ($konten->tipe === 'link') {
+                // Update link
+                if (!empty($validated['isi'])) {
+                    $link = trim($validated['isi']);
+
+                    // Tambahkan protokol jika belum ada
+                    if (!preg_match('/^https?:\/\//i', $link)) {
+                        $link = 'https://' . $link;
+                    }
+
+                    $konten->isi = $link;
                 }
 
-                $validated['isi'] = $link;
+            } elseif ($konten->tipe === 'teks') {
+                // Update teks
+                $konten->isi = $validated['isi'] ?? $konten->isi;
             }
 
-            // Update data
-            $konten->update([
-                'judul' => $validated['judul'],
-                'isi' => $validated['isi'] ?? $konten->isi,
-                'deskripsi' => $validated['deskripsi'] ?? $konten->deskripsi,
-            ]);
+            // Simpan perubahan
+            $konten->save();
 
             return back()->with('success', 'Konten berhasil diperbarui!');
+
         } catch (\Exception $e) {
+            Log::error('Error updating konten: ' . $e->getMessage());
             return back()->with('error', 'Gagal memperbarui konten: ' . $e->getMessage());
         }
     }
@@ -150,6 +186,7 @@ class KelasKontenController extends Controller
             if ($konten->tipe === 'file' && $konten->file_path) {
                 if (Storage::disk('public')->exists($konten->file_path)) {
                     Storage::disk('public')->delete($konten->file_path);
+                    Log::info('File deleted on destroy: ' . $konten->file_path);
                 }
             }
 
@@ -158,6 +195,7 @@ class KelasKontenController extends Controller
 
             return back()->with('success', 'Konten berhasil dihapus!');
         } catch (\Exception $e) {
+            Log::error('Error deleting konten: ' . $e->getMessage());
             return back()->with('error', 'Gagal menghapus konten: ' . $e->getMessage());
         }
     }
