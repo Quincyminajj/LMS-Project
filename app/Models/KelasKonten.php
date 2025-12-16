@@ -18,6 +18,7 @@ class KelasKonten extends Model
         'isi',
         'file_path',
         'uploaded_by',
+        'deskripsi',
     ];
 
     public function kelas()

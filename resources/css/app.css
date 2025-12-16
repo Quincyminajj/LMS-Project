@@ -1,0 +1,277 @@
+/* ========================================
+   RESPONSIVE STYLES untuk LMS Diponegoro
+   ======================================== */
+
+/* Root Variables */
+:root {
+    --primary-color: #0d6efd;
+    --mobile-padding: 15px;
+    --tablet-padding: 20px;
+    --desktop-padding: 30px;
+}
+
+/* Base Body Styles */
+body {
+    font-size: 16px;
+    line-height: 1.6;
+}
+
+/* ========================================
+   NAVBAR RESPONSIVE
+   ======================================== */
+
+.navbar-brand {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Mobile: Navbar lebih compact */
+@media (max-width: 575.98px) {
+    .navbar-brand {
+        font-size: 1rem;
+    }
+    
+    .navbar-nav {
+        margin-top: 10px;
+    }
+    
+    .navbar-nav .nav-link {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+}
+
+/* ========================================
+   CONTAINER & SPACING
+   ======================================== */
+
+/* Mobile First - Default untuk mobile */
+.container {
+    padding-left: var(--mobile-padding);
+    padding-right: var(--mobile-padding);
+}
+
+/* Tablet */
+@media (min-width: 768px) {
+    .container {
+        padding-left: var(--tablet-padding);
+        padding-right: var(--tablet-padding);
+    }
+}
+
+/* Desktop */
+@media (min-width: 992px) {
+    .container {
+        padding-left: var(--desktop-padding);
+        padding-right: var(--desktop-padding);
+    }
+}
+
+/* ========================================
+   CARDS RESPONSIVE
+   ======================================== */
+
+.card {
+    margin-bottom: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Mobile: Card lebih compact */
+@media (max-width: 575.98px) {
+    .card {
+        margin-bottom: 15px;
+    }
+    
+    .card-body {
+        padding: 15px;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+    }
+}
+
+/* ========================================
+   BUTTONS RESPONSIVE
+   ======================================== */
+
+/* Mobile: Button full width */
+@media (max-width: 575.98px) {
+    .btn {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+    
+    .btn-group {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem !important;
+        margin-bottom: 5px;
+    }
+}
+
+/* ========================================
+   TABLES RESPONSIVE
+   ======================================== */
+
+/* Wrapper untuk table agar bisa scroll horizontal */
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile: Table font lebih kecil */
+@media (max-width: 575.98px) {
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .table td, .table th {
+        padding: 8px;
+    }
+}
+
+/* ========================================
+   FORMS RESPONSIVE
+   ======================================== */
+
+/* Mobile: Form lebih rapi */
+@media (max-width: 575.98px) {
+    .form-label {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    .form-control, .form-select {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+/* ========================================
+   MODALS RESPONSIVE
+   ======================================== */
+
+/* Mobile: Modal full screen atau hampir full */
+@media (max-width: 575.98px) {
+    .modal-dialog {
+        margin: 10px;
+    }
+    
+    .modal-content {
+        border-radius: 10px;
+    }
+    
+    .modal-header, .modal-footer {
+        padding: 15px;
+    }
+    
+    .modal-body {
+        padding: 20px 15px;
+    }
+}
+
+/* ========================================
+   TYPOGRAPHY RESPONSIVE
+   ======================================== */
+
+h1, .h1 {
+    font-size: 1.8rem;
+}
+
+h2, .h2 {
+    font-size: 1.5rem;
+}
+
+h3, .h3 {
+    font-size: 1.3rem;
+}
+
+/* Tablet & Desktop: Font lebih besar */
+@media (min-width: 768px) {
+    h1, .h1 {
+        font-size: 2.5rem;
+    }
+    
+    h2, .h2 {
+        font-size: 2rem;
+    }
+    
+    h3, .h3 {
+        font-size: 1.75rem;
+    }
+}
+
+/* ========================================
+   IMAGES RESPONSIVE
+   ======================================== */
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
+.img-thumbnail {
+    max-width: 100%;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Hide on mobile */
+@media (max-width: 575.98px) {
+    .hide-mobile {
+        display: none !important;
+    }
+}
+
+/* Hide on tablet & desktop */
+@media (min-width: 576px) {
+    .hide-desktop {
+        display: none !important;
+    }
+}
+
+/* Text alignment responsive */
+@media (max-width: 575.98px) {
+    .text-mobile-center {
+        text-align: center !important;
+    }
+}
+
+/* ========================================
+   SWEETALERT RESPONSIVE
+   ======================================== */
+
+/* Mobile: SweetAlert lebih kecil */
+@media (max-width: 575.98px) {
+    .swal2-popup {
+        width: 90% !important;
+        font-size: 0.9rem;
+    }
+}
+
+/* ========================================
+   LOADING & SPINNERS
+   ======================================== */
+
+.spinner-border-sm {
+    width: 1rem;
+    height: 1rem;
+}
+
+/* Mobile: Loading indicators lebih visible */
+@media (max-width: 575.98px) {
+    .spinner-border {
+        width: 2rem;
+        height: 2rem;
+    }
+}

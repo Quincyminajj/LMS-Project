@@ -83,34 +83,59 @@
 
                                 <h6 class="fw-bold mb-2">{{ $konten->judul }}</h6>
 
-                                @if ($konten->tipe == 'teks')
+                                @if ($konten->tipe == 'file')
+                                    @if($konten->deskripsi)
+                                        <p class="text-secondary small mb-2">{{ Str::limit($konten->deskripsi, 100) }}</p>
+                                    @endif
+                                    <p class="text-muted small mb-3">
+                                        <i class="bi bi-paperclip"></i> {{ $konten->isi }}
+                                    </p>
+                                @elseif($konten->tipe == 'link')
+                                    @if($konten->deskripsi)
+                                        <p class="text-secondary small mb-2">{{ Str::limit($konten->deskripsi, 100) }}</p>
+                                    @endif
+                                    <p class="text-secondary small mb-3 text-truncate">
+                                        <i class="bi bi-link-45deg"></i> {{ $konten->isi }}
+                                    </p>
+                                @else
                                     <p class="text-secondary small mb-3">{{ Str::limit($konten->isi, 100) }}</p>
                                 @endif
 
-                                <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center">
                                     @if ($konten->tipe == 'file')
+                                    <div class="d-flex gap-2">
                                         <a href="{{ asset('storage/' . $konten->file_path) }}"
-                                            class="btn btn-primary btn-sm w-100" download>
-                                            <i class="bi bi-download"></i> Download File
+                                        class="btn btn-outline-primary btn-sm"
+                                        download>
+                                            <i class="bi bi-download"></i>
                                         </a>
+
+                                        <a href="{{ route('preview.file', $konten->file_path) }}"
+                                        class="btn btn-outline-success btn-sm"
+                                        target="_blank">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
                                     @elseif($konten->tipe == 'link')
-                                        <a href="{{ $konten->isi }}" target="_blank" class="btn btn-info btn-sm w-100">
+                                        <a href="{{ $konten->isi }}" target="_blank" class="btn btn-primary btn-sm">
                                             <i class="bi bi-box-arrow-up-right"></i> Buka Link
                                         </a>
                                     @else
-                                        <button class="btn btn-secondary btn-sm w-100" data-bs-toggle="modal"
-                                            data-bs-target="#modalViewKonten{{ $konten->id }}">
-                                            <i class="bi bi-eye"></i> Lihat Konten
+                                        <button class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
+                                            data-bs-target="#viewTextModal{{ $konten->id }}">
+                                            <i class="bi bi-eye"></i> Lihat Detail
                                         </button>
                                     @endif
+
+                                    <small class="text-muted">{{ $konten->created_at->format('d M Y') }}</small>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Modal View Konten Teks -->
+                    <!-- Modal View Text Content -->
                     @if ($konten->tipe == 'teks')
-                        <div class="modal fade" id="modalViewKonten{{ $konten->id }}" tabindex="-1">
+                        <div class="modal fade" id="viewTextModal{{ $konten->id }}" tabindex="-1">
                             <div class="modal-dialog modal-lg">
                                 <div class="modal-content">
                                     <div class="modal-header">
@@ -118,11 +143,11 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                     </div>
                                     <div class="modal-body">
-                                        <p class="text-muted small mb-3">
+                                        <p class="text-muted small mb-2">
                                             <i class="bi bi-calendar"></i> {{ $konten->created_at->format('d M Y, H:i') }}
                                         </p>
-                                        <div class="content-text">
-                                            {{ $konten->isi }}
+                                        <div class="border-top pt-3">
+                                            <p style="white-space: pre-wrap;">{{ $konten->isi }}</p>
                                         </div>
                                     </div>
                                     <div class="modal-footer">

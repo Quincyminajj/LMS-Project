@@ -21,6 +21,7 @@ class KelasKontenController extends Controller
             'tipe' => 'required|in:file,link,teks',
             'link_url' => 'nullable|string',
             'text_content' => 'nullable|string',
+            'deskripsi' => 'nullable|string',
             'file_path' => 'required_if:tipe,file|nullable|file|mimes:pdf,doc,docx,ppt,pptx,xls,xlsx,jpg,jpeg,png,zip,rar|max:10240',
         ], [
             'judul.required' => 'Judul konten wajib diisi',
@@ -38,6 +39,7 @@ class KelasKontenController extends Controller
             'uploaded_by' => session('identifier'),
             'isi' => null,
             'file_path' => null,
+            'deskripsi' => $validated['deskripsi'] ?? null,
         ];
 
         // Proses berdasarkan tipe konten
@@ -106,6 +108,7 @@ class KelasKontenController extends Controller
             $validated = $request->validate([
                 'judul' => 'required|string|max:255',
                 'isi' => 'nullable|string',
+                'deskripsi' => 'nullable|string',
             ]);
 
             // Jika tipe link, proses link
@@ -123,6 +126,7 @@ class KelasKontenController extends Controller
             $konten->update([
                 'judul' => $validated['judul'],
                 'isi' => $validated['isi'] ?? $konten->isi,
+                'deskripsi' => $validated['deskripsi'] ?? $konten->deskripsi,
             ]);
 
             return back()->with('success', 'Konten berhasil diperbarui!');

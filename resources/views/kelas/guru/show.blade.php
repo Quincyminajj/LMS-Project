@@ -99,7 +99,8 @@
             </li>
         </ul>
 
-        <!-- ========================================= -->
+
+<!-- ========================================= -->
         <!-- TAB KONTEN -->
         <!-- ========================================= -->
         @if (!request()->is('kelas/*/tugas') && !request()->is('kelas/*/forum'))
@@ -157,8 +158,16 @@
                                 <h6 class="fw-bold mb-2">{{ $konten->judul }}</h6>
 
                                 @if ($konten->tipe == 'file')
-                                    <p class="text-secondary small mb-3">{{ Str::limit($konten->isi, 50) }}</p>
+                                    @if($konten->deskripsi)
+                                        <p class="text-secondary small mb-2">{{ Str::limit($konten->deskripsi, 100) }}</p>
+                                    @endif
+                                    <p class="text-muted small mb-3">
+                                        <i class="bi bi-paperclip"></i> {{ $konten->isi }}
+                                    </p>
                                 @elseif($konten->tipe == 'link')
+                                    @if($konten->deskripsi)
+                                        <p class="text-secondary small mb-2">{{ Str::limit($konten->deskripsi, 100) }}</p>
+                                    @endif
                                     <p class="text-secondary small mb-3 text-truncate">
                                         <i class="bi bi-link-45deg"></i> {{ $konten->isi }}
                                     </p>
@@ -168,10 +177,19 @@
 
                                 <div class="d-flex justify-content-between align-items-center">
                                     @if ($konten->tipe == 'file')
+                                    <div class="d-flex gap-2">
                                         <a href="{{ asset('storage/' . $konten->file_path) }}"
-                                            class="btn btn-outline-primary btn-sm" download>
-                                            <i class="bi bi-download"></i> Download File
+                                        class="btn btn-outline-primary btn-sm"
+                                        download>
+                                            <i class="bi bi-download"></i>
                                         </a>
+
+                                        <a href="{{ route('preview.file', $konten->file_path) }}"
+                                        class="btn btn-outline-success btn-sm"
+                                        target="_blank">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                    </div>
                                     @elseif($konten->tipe == 'link')
                                         <a href="{{ $konten->isi }}" target="_blank" class="btn btn-primary btn-sm">
                                             <i class="bi bi-box-arrow-up-right"></i> Buka Link
@@ -233,16 +251,28 @@
                                                 <input type="text" name="judul" class="form-control"
                                                     value="{{ $konten->judul }}" required>
                                             </div>
-                                            @if ($konten->tipe == 'teks')
+                                            
+                                            @if ($konten->tipe == 'file')
                                                 <div class="mb-3">
-                                                    <label class="form-label">Isi</label>
-                                                    <textarea name="isi" class="form-control" rows="4">{{ $konten->isi }}</textarea>
+                                                    <label class="form-label">Deskripsi (Opsional)</label>
+                                                    <textarea name="deskripsi" class="form-control" rows="3" 
+                                                        placeholder="Tambahkan deskripsi untuk file ini...">{{ $konten->deskripsi }}</textarea>
                                                 </div>
                                             @elseif($konten->tipe == 'link')
                                                 <div class="mb-3">
                                                     <label class="form-label">Link</label>
                                                     <input type="text" name="isi" class="form-control"
                                                         value="{{ $konten->isi }}" placeholder="https://example.com">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">Deskripsi (Opsional)</label>
+                                                    <textarea name="deskripsi" class="form-control" rows="3" 
+                                                        placeholder="Tambahkan deskripsi untuk link ini...">{{ $konten->deskripsi }}</textarea>
+                                                </div>
+                                            @else
+                                                <div class="mb-3">
+                                                    <label class="form-label">Isi</label>
+                                                    <textarea name="isi" class="form-control" rows="4">{{ $konten->isi }}</textarea>
                                                 </div>
                                             @endif
                                         </div>
@@ -322,6 +352,14 @@
                                 <small class="text-muted">Contoh: www.youtube.com atau https://example.com</small>
                             </div>
 
+                            <!-- Deskripsi untuk File dan Link -->
+                            <div id="deskripsiField" class="mb-3 d-none">
+                                <label class="form-label fw-semibold">Deskripsi (Opsional)</label>
+                                <textarea name="deskripsi" class="form-control" rows="3" id="deskripsiInput"
+                                    placeholder="Tambahkan deskripsi untuk konten ini..."></textarea>
+                                <small class="text-muted">Berikan penjelasan singkat tentang konten ini</small>
+                            </div>
+
                             <!-- Text -->
                             <div id="textField" class="mb-3 d-none">
                                 <label class="form-label fw-semibold">Deskripsi *</label>
@@ -347,6 +385,7 @@
                 document.getElementById('fileUploadField').classList.add('d-none');
                 document.getElementById('linkField').classList.add('d-none');
                 document.getElementById('textField').classList.add('d-none');
+                const deskripsiField = document.getElementById('deskripsiField');
 
                 // Clear and disable hidden fields
                 const fileInput = document.getElementById('fileInput');
