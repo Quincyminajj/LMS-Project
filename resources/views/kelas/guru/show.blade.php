@@ -385,12 +385,13 @@
                 document.getElementById('fileUploadField').classList.add('d-none');
                 document.getElementById('linkField').classList.add('d-none');
                 document.getElementById('textField').classList.add('d-none');
-                const deskripsiField = document.getElementById('deskripsiField');
+                document.getElementById('deskripsiField').classList.add('d-none');
 
                 // Clear and disable hidden fields
                 const fileInput = document.getElementById('fileInput');
                 const linkInput = document.getElementById('linkInput');
                 const textInput = document.getElementById('textInput');
+                const deskripsiField = document.getElementById('deskripsiField');
 
                 // Reset all inputs
                 if (fileInput) {
@@ -409,10 +410,12 @@
                 // Show and require the appropriate field
                 if (tipe === 'file') {
                     document.getElementById('fileUploadField').classList.remove('d-none');
+                    document.getElementById('deskripsiField').classList.remove('d-none');
                     if (fileInput) fileInput.setAttribute('required', 'required');
                 }
                 if (tipe === 'link') {
                     document.getElementById('linkField').classList.remove('d-none');
+                    document.getElementById('deskripsiField').classList.remove('d-none');
                     if (linkInput) linkInput.setAttribute('required', 'required');
                 }
                 if (tipe === 'teks') {
