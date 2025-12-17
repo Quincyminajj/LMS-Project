@@ -25,52 +25,57 @@
             font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         }
     </style>
+    @stack('styles')
 </head>
-<body class="bg-light">
-    <!-- Responsive Header dengan Tailwind -->
+<body class="@yield('body-class', 'bg-light')">
+    <!-- Responsive Header -->
     <header class="bg-blue-600 text-white shadow-lg" style="background-color: #2563eb !important;">
-        <div class="container mx-auto px-4 sm:px-6 py-3 sm:py-4">
+        <div class="container mx-auto px-3 sm:px-6 py-3 sm:py-4">
             <div class="flex items-center justify-between">
-                <!-- Logo & Title - Responsive -->
+                <!-- Logo & Title -->
                 <div class="flex items-center space-x-2 sm:space-x-3">
-                    <i class="fas fa-book text-xl sm:text-2xl"></i>
+                    <i class="fas fa-book text-lg sm:text-2xl"></i>
                     <div>
-                        <span class="text-xl font-bold">LMS Diponegoro</span>
-                        <p class="text-xs sm:text-sm text-blue-100">Portal Pembelajaran</p>
+                        <h1 class="text-base sm:text-xl font-bold">@yield('header-title', 'LMS Diponegoro')</h1>
+                        <p class="text-xs sm:text-sm text-blue-100">@yield('header-subtitle', 'Portal Pembelajaran')</p>
                     </div>
                 </div>
-              <!-- User Info & Logout -->
-                <div class="flex items-center space-x-3 sm:space-x-4">
-                    <div class="text-right hidden sm:block min-w-[120px]">
-                        <p class="font-semibold text-sm sm:text-base whitespace-nowrap">{{ session('user_name') }}</p>
-                        <p class="text-xs sm:text-sm text-blue-100 whitespace-nowrap">
+                
+                <!-- User Info & Logout -->
+                <div class="flex items-center space-x-2 sm:space-x-4">
+                    <div class="text-right max-w-[140px] sm:max-w-none">
+                        <p class="font-semibold text-xs sm:text-sm break-words leading-tight">{{ session('user_name') }}</p>
+                        <p class="text-xs text-blue-100 whitespace-nowrap">
                             @if(session('user_role') == 'guru')
                                 NIP: {{ session('identifier') }}
                             @elseif(session('user_role') == 'siswa')
-                                NIS: {{ session('identifier') }}
+                                NISN: {{ session('identifier') }}
                             @else
                                 {{ session('identifier') }}
                             @endif
                         </p>
                     </div>
-                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center text-base sm:text-lg font-bold flex-shrink-0">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center text-sm sm:text-lg font-bold flex-shrink-0">
                         {{ substr(session('user_name'), 0, 1) }}
                     </div>
-                    <!-- Logout Button -->
-                    <a href="#" class="text-white hover:text-blue-200 flex-shrink-0 text-lg sm:text-xl" id="logoutButton">
-                        <i class="fas fa-sign-out-alt"></i>
+                    <a href="#" class="text-white hover:text-blue-200 flex-shrink-0" id="logoutButton">
+                        <i class="fas fa-sign-out-alt text-lg sm:text-xl"></i>
                     </a>
-                    <form id="logoutForm" action="{{ route('logout') }}" method="GET" class="hidden"></form>
-                </div>  
+                    <form id="logoutForm" action="{{ route('logout') }}" method="GET" class="d-none"></form>
+                </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content dengan Bootstrap (agar tidak rusak) -->
-    <main class="content-area">
-        <div class="container my-3 my-md-4 px-3 px-md-4">
+    <!-- Main Content -->
+    <main class="@yield('main-class', 'content-area')">
+        @hasSection('use-container')
+            <div class="container my-3 my-md-4 px-3 px-md-4">
+                @yield('content')
+            </div>
+        @else
             @yield('content')
-        </div>
+        @endif
     </main>
 
     @yield('modal')
@@ -103,34 +108,36 @@
                 timerProgressBar: true
             });
         @endif
-
-        // Logout Confirmation
-        const logoutBtn = document.getElementById('logoutButton');
-        if (logoutBtn) {
-            logoutBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-
-                Swal.fire({
-                    title: "Yakin ingin logout?",
-                    text: "Anda akan keluar dari sistem.",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Ya, Logout",
-                    cancelButtonText: "Batal",
-                    reverseButtons: true
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        document.getElementById('logoutForm').submit();
-                    }
-                });
-            });
-        }
     </script>
-    
-    <!-- Custom Scripts -->
-    @yield('scripts')
 
+    <!-- Logout Confirmation Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const logoutBtn = document.getElementById('logoutButton');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+
+                    Swal.fire({
+                        title: "Yakin ingin logout?",
+                        text: "Anda akan keluar dari sistem.",
+                        icon: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#3085d6",
+                        cancelButtonColor: "#d33",
+                        confirmButtonText: "Ya, Logout",
+                        cancelButtonText: "Batal",
+                        reverseButtons: true
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            document.getElementById('logoutForm').submit();
+                        }
+                    });
+                });
+            }
+        });
+    </script>
+
+    @stack('scripts')
 </body>
 </html>
