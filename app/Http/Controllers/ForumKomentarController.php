@@ -10,13 +10,13 @@ class ForumKomentarController extends Controller
 {
     public function index()
     {
-        $komentars = ForumKomentar::with('children')->orderBy('created_at', 'asc')->get();
+        $komentars = ForumKomentar::with('replies')->orderBy('created_at', 'asc')->get();
         return response()->json($komentars);
     }
 
     public function show($id)
     {
-        $komentar = ForumKomentar::with('children')->findOrFail($id);
+        $komentar = ForumKomentar::with('replies')->findOrFail($id);
         return response()->json($komentar);
     }
 
@@ -65,6 +65,11 @@ class ForumKomentarController extends Controller
         }
 
         $forum_id = $komentar->forum_id;
+        
+        // Hapus semua replies terlebih dahulu (cascade delete)
+        $komentar->replies()->delete();
+        
+        // Hapus komentar
         $komentar->delete();
 
         return redirect()->route('forum.show', $forum_id)->with('success', 'Komentar berhasil dihapus');
