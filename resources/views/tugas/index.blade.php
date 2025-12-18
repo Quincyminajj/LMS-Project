@@ -67,7 +67,7 @@
                     $sudahSubmit = false;
                     $nilaiSiswa = null;
                     if (session('role') === 'siswa') {
-                        $pengumpulan = $tugas->pengumpulan()->where('siswa_nisn', session('identifier'))->first(); // ✅ BENAR
+                        $pengumpulan = $tugas->pengumpulan()->where('siswa_nisn', session('identifier'))->first();
                         $sudahSubmit = !empty($pengumpulan);
                         $nilaiSiswa = $pengumpulan->nilai ?? null;
                     }
@@ -117,19 +117,47 @@
                                 <span class="badge bg-primary">
                                     Nilai: {{ $tugas->nilai_maksimal }}
                                 </span>
+                                <span class="badge bg-warning text-dark">
+                                    KKM: {{ $tugas->kkm }}
+                                </span>
                             </div>
 
-                            @if (session('role') === 'siswa')
+                             @if (session('role') === 'siswa')
                                 @if ($sudahSubmit)
-                                    <div class="alert alert-success py-2 px-3 mb-2">
-                                        <i class="bi bi-check-circle"></i> Tugas telah dinilai
-                                        @if ($nilaiSiswa)
-                                            <strong class="float-end">Nilai Anda: {{ $nilaiSiswa }}</strong>
-                                        @endif
+                                    @php
+                                        $isLulus = $nilaiSiswa && $nilaiSiswa >= $tugas->kkm;
+                                        $bgColor = $nilaiSiswa ? ($isLulus ? 'bg-success' : 'bg-danger') : 'bg-info';
+                                        $textColor = $nilaiSiswa ? ($isLulus ? 'text-success' : 'text-danger') : 'text-info';
+                                        $icon = $nilaiSiswa ? ($isLulus ? 'bi-check-circle-fill' : 'bi-x-circle-fill') : 'bi-clock-fill';
+                                        $statusText = $nilaiSiswa ? ($isLulus ? 'Lulus KKM' : 'Belum Lulus') : 'Menunggu Penilaian';
+                                    @endphp
+                                    
+                                    <div class="card border-0 shadow-sm mb-2" style="background: linear-gradient(135deg, {{ $nilaiSiswa ? ($isLulus ? '#d4edda' : '#f8d7da') : '#d1ecf1' }} 0%, #ffffff 100%);">
+                                        <div class="card-body p-3">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <i class="bi {{ $icon }} {{ $textColor }} fs-5"></i>
+                                                    <span class="fw-semibold text-dark">{{ $statusText }}</span>
+                                                </div>
+                                                @if ($nilaiSiswa)
+                                                    <div class="text-end">
+                                                        <div class="badge {{ $bgColor }} px-3 py-2" style="font-size: 0.95rem;">
+                                                            {{ $nilaiSiswa }} / {{ $tugas->nilai_maksimal }}
+                                                        </div>
+                                                        <small class="d-block mt-1 {{ $textColor }} fw-semibold">
+                                                            KKM: {{ $tugas->kkm }}
+                                                        </small>
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        </div>
                                     </div>
                                 @else
-                                    <div class="alert alert-warning py-2 px-3 mb-2">
-                                        <i class="bi bi-exclamation-circle"></i> Belum dikumpulkan
+                                    <div class="alert alert-warning py-2 px-3 mb-2 border-0 shadow-sm">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <i class="bi bi-exclamation-circle fs-5"></i>
+                                            <span class="fw-semibold">Belum dikumpulkan</span>
+                                        </div>
                                     </div>
                                 @endif
                             @endif
@@ -174,6 +202,12 @@
                                                 <input type="number" name="nilai_maksimal" class="form-control"
                                                     value="{{ $tugas->nilai_maksimal }}" required>
                                             </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">KKM *</label>
+                                            <input type="number" name="kkm" class="form-control"
+                                                value="{{ $tugas->kkm }}" min="0" max="100" step="0.01" required>
+                                            <small class="text-muted">Kriteria Ketuntasan Minimal (0-100)</small>
                                         </div>
                                     </div>
                                     <div class="modal-footer">
@@ -239,9 +273,26 @@
                                 </div>
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">Nilai Maksimal *</label>
-                                    <input type="number" name="nilai_maksimal" class="form-control" placeholder="100"
+                                    <input type="number" name="nilai_maksimal" id="nilai_maksimal" class="form-control" placeholder="100"
                                         value="100" required>
                                 </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">KKM *</label>
+                                <div class="input-group">
+                                    <input type="number" name="kkm" id="kkm_input" class="form-control" placeholder="75"
+                                        value="75" min="0" max="100" step="0.01" required>
+                                    <span class="input-group-text">
+                                        <input class="form-check-input mt-0" type="checkbox" id="use_mapel_kkm">
+                                    </span>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <label class="form-check-label text-muted small" for="use_mapel_kkm">
+                                        ☑ Gunakan KKM Mata Pelajaran
+                                    </label>
+                                </div>
+                                <small class="text-muted">Kriteria Ketuntasan Minimal (0-100)</small>
                             </div>
 
                             <div class="mb-3">
@@ -260,6 +311,7 @@
             </div>
         </div>
     @endsection
+    
     <script>
         function confirmDeleteTugas(id) {
             Swal.fire({
@@ -277,5 +329,25 @@
                 }
             })
         }
-</script>
+
+        // Auto-fill KKM dari Mata Pelajaran (jika checkbox dicentang)
+        document.addEventListener('DOMContentLoaded', function() {
+            const useMapelKkmCheckbox = document.getElementById('use_mapel_kkm');
+            const kkmInput = document.getElementById('kkm_input');
+            
+            if (useMapelKkmCheckbox) {
+                useMapelKkmCheckbox.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Di sini Anda bisa fetch KKM dari mata pelajaran
+                        // Contoh: kkmInput.value = "75"; // Atau dari AJAX
+                        kkmInput.readOnly = true;
+                        kkmInput.classList.add('bg-light');
+                    } else {
+                        kkmInput.readOnly = false;
+                        kkmInput.classList.remove('bg-light');
+                    }
+                });
+            }
+        });
+    </script>
 @endif

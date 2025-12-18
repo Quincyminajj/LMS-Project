@@ -60,21 +60,28 @@
 
                         <div class="border-top border-bottom py-3 my-3">
                             <div class="row g-3">
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <small class="text-muted d-block">Deadline</small>
                                     <strong>
                                         <i class="bi bi-calendar-event text-danger"></i>
                                         {{ $tugas->deadline->format('d M Y, H:i') }}
                                     </strong>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <small class="text-muted d-block">Nilai Maksimal</small>
                                     <strong>
                                         <i class="bi bi-trophy text-warning"></i>
-                                        {{ $tugas->nilai_maksimal }}
+                                        {{ number_format($tugas->nilai_maksimal, 2) }}
                                     </strong>
                                 </div>
-                                <div class="col-md-4">
+                                <div class="col-md-3">
+                                    <small class="text-muted d-block">KKM</small>
+                                    <strong>
+                                        <i class="bi bi-bar-chart text-info"></i>
+                                        {{ number_format($tugas->kkm, 0) }}
+                                    </strong>
+                                </div>
+                                <div class="col-md-3">
                                     <small class="text-muted d-block">Status Deadline</small>
                                     @if ($tugas->deadline->isPast())
                                         <span class="badge bg-danger">Sudah Lewat</span>
@@ -133,10 +140,16 @@
                                         </div>
                                         @if ($pengumpulan->nilai)
                                             <div class="text-end">
-                                                <div class="badge bg-primary"
+                                                @php
+                                                    $isLulusKkm = $pengumpulan->nilai >= $tugas->kkm;
+                                                @endphp
+                                                <div class="badge {{ $isLulusKkm ? 'bg-success' : 'bg-danger' }}"
                                                     style="font-size: 1.2rem; padding: 10px 15px;">
                                                     Nilai: {{ $pengumpulan->nilai }}
                                                 </div>
+                                                <small class="d-block mt-1 {{ $isLulusKkm ? 'text-success' : 'text-danger' }}">
+                                                    {{ $isLulusKkm ? '✓ Lulus KKM' : '✗ Belum Lulus KKM' }}
+                                                </small>
                                             </div>
                                         @endif
                                     </div>
@@ -238,8 +251,18 @@
                                         @endif
 
                                         @if ($p->nilai)
-                                            <div class="alert alert-success py-2 mb-0 mt-2">
-                                                <strong>Nilai: {{ $p->nilai }}</strong>
+                                            @php
+                                                $isLulusKkm = $p->nilai >= $tugas->kkm;
+                                            @endphp
+                                            <div class="alert {{ $isLulusKkm ? 'alert-success' : 'alert-warning' }} py-2 mb-0 mt-2">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <strong>Nilai: {{ $p->nilai }}</strong>
+                                                        <span class="badge {{ $isLulusKkm ? 'bg-success' : 'bg-danger' }} ms-2">
+                                                            {{ $isLulusKkm ? '✓ Lulus KKM' : '✗ Belum Lulus' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                                 @if ($p->catatan_guru)
                                                     <p class="mb-0 small mt-1">Catatan: {{ $p->catatan_guru }}</p>
                                                 @endif
@@ -265,11 +288,14 @@
                                             <form action="{{ route('tugaspengumpulan.update', $p->id) }}" method="POST">
                                                 @csrf @method('PUT')
                                                 <div class="modal-body">
+                                                    <div class="alert alert-info py-2">
+                                                        <small><i class="bi bi-info-circle"></i> <strong>KKM Tugas: {{ $tugas->kkm }}</strong></small>
+                                                    </div>
                                                     <div class="mb-3">
                                                         <label class="form-label">Nilai *</label>
                                                         <input type="number" name="nilai" class="form-control"
                                                             value="{{ $p->nilai }}" min="0"
-                                                            max="{{ $tugas->nilai_maksimal }}" required>
+                                                            max="{{ $tugas->nilai_maksimal }}" step="0.01" required>
                                                         <small class="text-muted">Maksimal:
                                                             {{ $tugas->nilai_maksimal }}</small>
                                                     </div>
@@ -340,6 +366,20 @@
                                     class="fs-4 text-warning">{{ $tugas->pengumpulan->whereNull('nilai')->count() }}</strong>
                                 siswa
                             </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Lulus KKM</small>
+                                <strong class="fs-4 text-success">
+                                    {{ $tugas->pengumpulan->where('nilai', '>=', $tugas->kkm)->count() }}
+                                </strong> siswa
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Belum Lulus KKM</small>
+                                <strong class="fs-4 text-danger">
+                                    {{ $tugas->pengumpulan->whereNotNull('nilai')->where('nilai', '<', $tugas->kkm)->count() }}
+                                </strong> siswa
+                            </div>
                         @endif
 
                         <hr>
@@ -386,6 +426,12 @@
                                         value="{{ $tugas->nilai_maksimal }}" required>
                                 </div>
                             </div>
+                            <div class="mb-3">
+                                <label class="form-label">KKM *</label>
+                                <input type="number" name="kkm" class="form-control"
+                                    value="{{ $tugas->kkm }}" min="0" max="100" step="0.01" required>
+                                <small class="text-muted">Kriteria Ketuntasan Minimal (0-100)</small>
+                            </div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
@@ -396,7 +442,8 @@
             </div>
         </div>
     @endif
-        <script>
+    
+    <script>
         function confirmDeleteTugas(id) {
             Swal.fire({
                 title: 'Hapus Tugas?',
@@ -413,5 +460,5 @@
                 }
             })
         }
-        </script>
+    </script>
 @endsection

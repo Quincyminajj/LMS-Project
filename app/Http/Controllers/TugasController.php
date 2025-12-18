@@ -44,6 +44,7 @@ class TugasController extends Controller
             'deskripsi' => 'required',
             'deadline' => 'required|date',
             'nilai_maksimal' => 'nullable|numeric|min:0',
+            'kkm' => 'nullable|numeric|min:0|max:100',
             'file_contoh' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', 
         ]);
 
@@ -60,6 +61,7 @@ class TugasController extends Controller
                 'deskripsi' => $request->deskripsi,
                 'deadline' => $request->deadline,
                 'nilai_maksimal' => $request->nilai_maksimal ?? 100,
+                'kkm' => $request->kkm ?? 75,
                 'file_contoh' => $fileContohPath,
                 'created_by' => session('identifier'),
             ]);
@@ -77,6 +79,7 @@ class TugasController extends Controller
             'deskripsi' => 'required',
             'deadline' => 'required|date',
             'nilai_maksimal' => 'nullable|numeric|min:0',
+            'kkm' => 'nullable|numeric|min:0|max:100',
             'file_contoh' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:5120', // Max 5MB
         ]);
 
@@ -100,6 +103,7 @@ class TugasController extends Controller
                 'judul' => $request->judul,
                 'deskripsi' => $request->deskripsi,
                 'nilai_maksimal' => $request->nilai_maksimal ?? 100,
+                'kkm' => $request->kkm ?? 75,
                 'deadline' => $request->deadline,
                 'file_contoh' => $fileContohPath,
             ]);
