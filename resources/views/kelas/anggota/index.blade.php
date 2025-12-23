@@ -5,45 +5,47 @@
 @section('content')
 <div class="container py-4">
 
-    <!-- Header Kelas -->
-    <div class="card mb-4 border-0 shadow-sm">
-        <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start">
-                <div>
-                    <a href="{{ route('dashboard') }}" class="text-decoration-none text-secondary mb-2 d-inline-block">
-                        <i class="bi bi-arrow-left"></i> Kembali
-                    </a>
-                    <h3 class="fw-bold mb-2">{{ $kelas->nama_kelas }}</h3>
-                    <p class="text-secondary mb-2">{{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }} • Kode: {{ $kelas->kode_kelas }}</p>
-                    <p class="text-muted small mb-0">{{ $kelas->deskripsi }}</p>
+        <!-- Header Kelas -->
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <a href="{{ route('dashboard') }}" class="text-decoration-none text-secondary mb-2 d-inline-block">
+                            <i class="bi bi-arrow-left"></i> Kembali
+                        </a>
+                        <h3 class="fw-bold mb-2">{{ $kelas->nama_kelas }}</h3>
+                        <p class="text-secondary mb-0">{{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }} • Kode:
+                            {{ $kelas->kode_kelas }}</p>
+                        <p class="text-muted small mb-0">{{ $kelas->deskripsi }}</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Tab Navigation -->
-    <ul class="nav nav-tabs mb-4">
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('kelas.show', $kelas->id) }}">
-                <i class="bi bi-book"></i> Konten
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('tugas.index', $kelas->id) }}">
-                <i class="bi bi-clipboard-check"></i> Tugas
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{{ route('kelas.forum', $kelas->id) }}">
-                <i class="bi bi-chat-dots"></i> Forum
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link active" href="{{ route('kelas.anggota', $kelas->id) }}">
-                <i class="bi bi-people"></i> Anggota
-            </a>
-        </li>
-    </ul>
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link px-2 px-md-3 small" href="{{ route('kelas.show', $kelas->id) }}">
+                    <i class="bi bi-book"></i> <span class="d-none d-sm-inline">Konten</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2 px-md-3 small" href="{{ route('tugas.index', $kelas->id) }}">
+                    <i class="bi bi-clipboard-check"></i> <span class="d-none d-sm-inline">Tugas</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link px-2 px-md-3 small" href="{{ route('kelas.forum', $kelas->id) }}">
+                    <i class="bi bi-chat-dots"></i> <span class="d-none d-sm-inline">Forum</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active px-2 px-md-3 small {{ request()->is('kelas/*/anggota') ? 'active' : '' }}"
+                    href="{{ route('kelas.anggota', $kelas->id) }}">
+                    <i class="bi bi-people"></i> <span class="d-none d-sm-inline">Anggota</span>
+                </a>
+            </li>
+        </ul>
 
     <!-- Header Daftar Siswa -->
     @if(session('role') === 'guru')
@@ -121,15 +123,15 @@
                             <tr>
                                 <td class="px-4">{{ $index + 1 }}</td>
                                 <td>
-                                    <div class="d-flex align-items-center">
+                                            <div class="d-flex align-items-center flex-shrink-0">
                                         @if($item->siswa && $item->siswa->foto)
                                             <img src="{{ asset('storage/' . $item->siswa->foto) }}" 
                                                  alt="Foto" 
-                                                 class="rounded-circle me-2" 
-                                                 style="width: 35px; height: 35px; object-fit: cover;">
+                                                 class="rounded-circle me-2 flex-shrink-0" 
+                                                 style="width: 35px; height: 35px; min-width: 35px; min-height: 35px; object-fit: cover;">
                                         @else
-                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
-                                                 style="width: 35px; height: 35px;">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2 flex-shrink-0" 
+                                                 style="width: 35px; height: 35px; min-width: 35px; min-height: 35px;">
                                                 <i class="bi bi-person-fill"></i>
                                             </div>
                                         @endif
@@ -155,14 +157,13 @@
                                 </td>
                                 @if(session('role') === 'guru')
                                 <td class="text-center">
-
                                     <a href="{{ route('kelas.anggota.show', [$kelas->id, $item->id]) }}"
-                                    class="btn btn-sm btn-outline-primary">
+                                    class="btn btn-sm btn-outline-primary me-1 mb-1 mb-md-0">
                                         <i class="bi bi-eye"></i>
                                     </a>
 
                                     <button type="button" 
-                                            class="btn btn-sm btn-outline-danger"
+                                            class="btn btn-sm btn-outline-danger mb-1 mb-md-0"
                                             onclick="hapusAnggota({{ $item->id }}, '{{ addslashes($item->siswa->nama ?? 'Siswa') }}', {{ $kelas->id }})">
                                         <i class="bi bi-trash"></i>
                                     </button>

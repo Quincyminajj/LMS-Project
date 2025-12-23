@@ -16,15 +16,12 @@
                             <i class="bi bi-arrow-left"></i> Kembali
                         </a>
                         <h3 class="fw-bold mb-2">{{ $kelas->nama_kelas }}</h3>
-                        <p class="text-secondary mb-2">
-                            <i class="bi bi-person-circle"></i> {{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }}
-                            • <i class="bi bi-key"></i> Kode: {{ $kelas->kode_kelas }}
-                        </p>
+                        <p class="text-secondary mb-0">{{ $kelas->guru->nama_guru ?? 'Guru tidak terdaftar' }} • Kode:
+                            {{ $kelas->kode_kelas }}</p>
                         <p class="text-muted small mb-0">{{ $kelas->deskripsi }}</p>
                     </div>
-
                     <!-- Badge Status Siswa -->
-                    <span class="badge bg-success fs-6">
+                    <span class="badge bg-success fs-">
                         <i class="bi bi-check-circle"></i> Anggota Kelas
                     </span>
                 </div>
@@ -36,25 +33,26 @@
             <li class="nav-item">
                 <a class="nav-link {{ !request()->is('kelas/*/tugas') && !request()->is('kelas/*/forum') ? 'active' : '' }}"
                     href="{{ route('kelas.show', $kelas->id) }}">
-                    <i class="bi bi-book"></i> Konten
+                    <i class="bi bi-book"></i> <span class="d-none d-sm-inline">Konten</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->is('kelas/*/tugas') ? 'active' : '' }}"
                     href="{{ route('tugas.index', $kelas->id) }}">
-                    <i class="bi bi-clipboard-check"></i> Tugas
+                    <i class="bi bi-clipboard-check"></i> <span class="d-none d-sm-inline">Tugas</span>
                 </a>
+            </li>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->is('kelas/*/forum') ? 'active' : '' }}"
                     href="{{ route('kelas.forum', $kelas->id) }}">
-                    <i class="bi bi-chat-dots"></i> Forum
+                    <i class="bi bi-chat-dots"></i> <span class="d-none d-sm-inline">Forum</span>
                 </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->is('kelas/*/anggota') ? 'active' : '' }}"
                     href="{{ route('kelas.anggota', $kelas->id) }}">
-                    <i class="bi bi-people"></i> Anggota
+                    <i class="bi bi-people"></i> <span class="d-none d-sm-inline">Anggota</span>
                 </a>
             </li>
         </ul>

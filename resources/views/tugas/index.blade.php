@@ -22,27 +22,27 @@
             </div>
         </div>
 
-        <!-- Tab Navigation -->
+        <!-- Tab Navigation - Mobile Optimized -->
         <ul class="nav nav-tabs mb-4">
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('kelas.show', $kelas->id) }}">
-                    <i class="bi bi-book"></i> Konten
+                <a class="nav-link px-2 px-md-3 small" href="{{ route('kelas.show', $kelas->id) }}">
+                    <i class="bi bi-book"></i> <span class="d-none d-sm-inline">Konten</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link active" href="{{ route('tugas.index', $kelas->id) }}">
-                    <i class="bi bi-clipboard-check"></i> Tugas
+                <a class="nav-link active px-2 px-md-3 small" href="{{ route('tugas.index', $kelas->id) }}">
+                    <i class="bi bi-clipboard-check"></i> <span class="d-none d-sm-inline">Tugas</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ route('kelas.forum', $kelas->id) }}">
-                    <i class="bi bi-chat-dots"></i> Forum
+                <a class="nav-link px-2 px-md-3 small" href="{{ route('kelas.forum', $kelas->id) }}">
+                    <i class="bi bi-chat-dots"></i> <span class="d-none d-sm-inline">Forum</span>
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ request()->is('kelas/*/anggota') ? 'active' : '' }}"
+                <a class="nav-link px-2 px-md-3 small {{ request()->is('kelas/*/anggota') ? 'active' : '' }}"
                     href="{{ route('kelas.anggota', $kelas->id) }}">
-                    <i class="bi bi-people"></i> Anggota
+                    <i class="bi bi-people"></i> <span class="d-none d-sm-inline">Anggota</span>
                 </a>
             </li>
         </ul>
@@ -109,7 +109,7 @@
                                 @endif
                             </div>
 
-                            <div class="d-flex gap-2 mb-3">
+                            <div class="d-flex gap-2 mb-3 flex-wrap">
                                 <span class="badge bg-light text-dark">
                                     <i class="bi bi-calendar-event"></i> Deadline:
                                     {{ $tugas->deadline->format('d M Y, H:i') }}
