@@ -31,7 +31,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link active px-2 px-md-3 small" href="{{ route('tugas.index', $kelas->id) }}">
-                    <i class="bi bi-clipboard-check"></i> <span class="d-none d-sm-inline">Tugas</span>
+                    <i class="bi bi-clipboard-check"></i> Tugas</span>
                 </a>
             </li>
             <li class="nav-item">

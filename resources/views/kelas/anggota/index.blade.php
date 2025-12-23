@@ -42,7 +42,7 @@
             <li class="nav-item">
                 <a class="nav-link active px-2 px-md-3 small {{ request()->is('kelas/*/anggota') ? 'active' : '' }}"
                     href="{{ route('kelas.anggota', $kelas->id) }}">
-                    <i class="bi bi-people"></i> <span class="d-none d-sm-inline">Anggota</span>
+                    <i class="bi bi-people"></i> Anggota</span>
                 </a>
             </li>
         </ul>

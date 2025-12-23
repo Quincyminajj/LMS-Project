@@ -36,7 +36,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link active px-2 px-md-3 small" href="{{ route('kelas.forum', $kelas->id) }}">
-                    <i class="bi bi-chat-dots"></i> <span class="d-none d-sm-inline">Forum</span>
+                    <i class="bi bi-chat-dots"></i> Forum</span>
                 </a>
             </li>
             <li class="nav-item">

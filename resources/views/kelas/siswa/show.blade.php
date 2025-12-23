@@ -33,7 +33,7 @@
             <li class="nav-item">
                 <a class="nav-link {{ !request()->is('kelas/*/tugas') && !request()->is('kelas/*/forum') ? 'active' : '' }}"
                     href="{{ route('kelas.show', $kelas->id) }}">
-                    <i class="bi bi-book"></i> <span class="d-none d-sm-inline">Konten</span>
+                    <i class="bi bi-book"></i> Konten</span>
                 </a>
             </li>
             <li class="nav-item">

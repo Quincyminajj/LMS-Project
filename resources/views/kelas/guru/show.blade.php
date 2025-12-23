@@ -76,7 +76,7 @@
         <ul class="nav nav-tabs mb-4">
             <li class="nav-item">
                 <a class="nav-link active px-2 px-md-3 small" href="{{ route('kelas.show', $kelas->id) }}">
-                    <i class="bi bi-book"></i> <span class="d-none d-sm-inline">Konten</span>
+                    <i class="bi bi-book"></i> Konten</span>
                 </a>
             </li>
             <li class="nav-item">
