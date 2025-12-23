@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
 
 <body class="bg-gray-50">
@@ -102,11 +103,11 @@
                             <span class="bg-yellow-500 text-white text-xs px-2 py-1 rounded-full">{{ $kelasDiarsipkan }}</span>
                         @endif
                     </a>
-                    <a href="{{ route('kelas.create') }}"
+                    <button onclick="openCreateModal()"
                         class="bg-blue-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center justify-center space-x-2 text-sm">
                         <i class="fas fa-plus"></i>
                         <span>Buat Kelas Baru</span>
-                    </a>
+                    </button>
                 </div>
             </div>
 
@@ -146,14 +147,91 @@
                 <div class="text-center py-8 sm:py-12">
                     <i class="fas fa-chalkboard-teacher text-gray-300 text-4xl sm:text-6xl mb-3 sm:mb-4"></i>
                     <p class="text-gray-500 text-base sm:text-lg mb-3 sm:mb-4">Anda belum membuat kelas apapun</p>
-                    <a href="{{ route('kelas.create') }}"
+                    <button onclick="openCreateModal()"
                         class="inline-block bg-blue-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-blue-700 transition text-sm sm:text-base">
                         Buat Kelas Pertama
-                    </a>
+                    </button>
                 </div>
             @endif
         </div>
     </main>
+
+    <!-- Modal Create Kelas -->
+    <div id="createKelasModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <!-- Modal Header -->
+            <div class="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold text-gray-800">Buat Kelas Baru</h3>
+                    <p class="text-sm text-gray-500 mt-1">Isi form di bawah untuk membuat kelas baru</p>
+                </div>
+                <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Modal Body -->
+            <div class="p-6">
+                <form method="POST" action="{{ route('kelas.store') }}" id="createKelasForm">
+                    @csrf
+
+                    <!-- Nama Kelas -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="bi bi-book text-green-600"></i> Nama Kelas *
+                        </label>
+                        <input type="text" name="nama_kelas" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            placeholder="Contoh: Matematika Kelas 10A" 
+                            value="{{ old('nama_kelas') }}" required>
+                        @error('nama_kelas')
+                            <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <!-- Deskripsi -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            <i class="bi bi-text-left text-cyan-600"></i> Deskripsi Kelas *
+                        </label>
+                        <textarea name="deskripsi" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                            rows="5" 
+                            placeholder="Jelaskan tentang kelas ini, materi yang akan dipelajari, atau informasi penting lainnya..." 
+                            required>{{ old('deskripsi') }}</textarea>
+                        @error('deskripsi')
+                            <div class="text-red-500 text-xs mt-1">{{ $message }}</div>
+                        @enderror
+                        <small class="text-gray-500 text-xs mt-1 block">Deskripsi akan membantu siswa memahami konten kelas</small>
+                    </div>
+
+                    <!-- Info Box -->
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <h6 class="font-semibold text-sm text-gray-800 mb-2">
+                            <i class="bi bi-info-circle text-blue-600"></i> Informasi
+                        </h6>
+                        <ul class="text-xs text-gray-600 space-y-1 list-disc list-inside">
+                            <li>Setelah kelas dibuat, Anda dapat menambahkan konten pembelajaran</li>
+                            <li>Siswa dapat bergabung menggunakan <strong>kode kelas</strong></li>
+                            <li>Anda dapat mengelola anggota, tugas, dan forum diskusi</li>
+                        </ul>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeCreateModal()" 
+                            class="flex-1 px-4 py-3 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition font-medium">
+                            <i class="bi bi-x-circle"></i> Batal
+                        </button>
+                        <button type="submit" 
+                            class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
+                            <i class="bi bi-check-circle"></i> Buat Kelas
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
     <!-- Success/Error Messages -->
     @if (session('success'))
@@ -187,6 +265,30 @@
     @endif
 
     <script>
+        function openCreateModal() {
+            document.getElementById('createKelasModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeCreateModal() {
+            document.getElementById('createKelasModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('createKelasModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeCreateModal();
+            }
+        });
+
+        // Close modal with ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeCreateModal();
+            }
+        });
+
         function copyKodeKelas(kode) {
             navigator.clipboard.writeText(kode).then(() => {
                 Swal.fire({
