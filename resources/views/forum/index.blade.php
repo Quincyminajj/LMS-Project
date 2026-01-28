@@ -50,9 +50,11 @@
         <!-- Header Forum -->
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="mb-0">Diskusi Forum</h5>
-            <a href="{{ route('forum.create', $kelas->id) }}" class="btn btn-primary">
-                <i class="bi bi-plus-lg"></i> Buat Diskusi
-            </a>
+            @if(session('role') !== 'siswa')
+                <a href="{{ route('forum.create', $kelas->id) }}" class="btn btn-primary">
+                    <i class="bi bi-plus-lg"></i> Buat Diskusi
+                </a>
+            @endif
         </div>
 
         <!-- List Forum -->
@@ -130,9 +132,11 @@
                     <div class="text-center py-5">
                         <i class="bi bi-chat-square-text fs-1 text-muted"></i>
                         <p class="text-secondary mt-3">Belum ada diskusi forum</p>
-                        <a href="{{ route('forum.create', $kelas->id) }}" class="btn btn-primary mt-2">
-                            <i class="bi bi-plus-lg"></i> Mulai Diskusi Pertama
-                        </a>
+                        @if(session('role') !== 'siswa')
+                            <a href="{{ route('forum.create', $kelas->id) }}" class="btn btn-primary mt-2">
+                                <i class="bi bi-plus-lg"></i> Mulai Diskusi Pertama
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endforelse

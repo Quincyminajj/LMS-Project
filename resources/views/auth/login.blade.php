@@ -91,7 +91,7 @@
 
                         <!-- NIP / NISN -->
                         <div class="mb-3 position-relative">
-                            <label for="nip" class="form-label">NIP / NISN</label>
+                            <label for="nip" class="form-label">NIP / NIPD</label>
                             <div class="input-group">
                                 <span class="input-group-text">
                                     <i class="bi bi-person-badge"></i>
@@ -101,7 +101,7 @@
                                     class="form-control @error('nip') is-invalid @enderror" 
                                     name="nip" 
                                     id="nip" 
-                                    placeholder="Masukkan NIP atau NISN" 
+                                    placeholder="Masukkan NIP atau NIPD" 
                                     value="{{ old('nip') }}" 
                                     required 
                                     autofocus>

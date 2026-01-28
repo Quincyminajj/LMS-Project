@@ -97,15 +97,25 @@
                             <p class="text-secondary" style="white-space: pre-line;">{{ $tugas->deskripsi }}</p>
                         </div>
 
-                        @if ($tugas->file_contoh)
+                            @if ($tugas->file_contoh)
                             <div class="alert alert-light border">
                                 <i class="bi bi-paperclip"></i> <strong>File Lampiran:</strong>
                                   
-                                {{-- Tambahkan tombol preview jika file PDF --}}
-                                @if (pathinfo($tugas->file_contoh, PATHINFO_EXTENSION) === 'pdf')
+                                {{-- Tambahkan tombol preview untuk PDF, JPG, dan PNG --}}
+                                @php
+                                    $extension = strtolower(pathinfo($tugas->file_contoh, PATHINFO_EXTENSION));
+                                    $supportedExtensions = ['pdf', 'jpg', 'jpeg', 'png'];
+                                @endphp
+                                
+                                @if (in_array($extension, $supportedExtensions))
                                     <a href="{{ route('preview.file', $tugas->file_contoh) }}"
                                         class="btn btn-sm btn-outline-success ms-2" target="_blank">
                                         <i class="bi bi-eye"></i> Lihat File
+                                    </a>
+                                @else
+                                    <a href="{{ asset('storage/' . $tugas->file_contoh) }}"
+                                        class="btn btn-sm btn-outline-primary ms-2" download>
+                                        <i class="bi bi-download"></i> Unduh File
                                     </a>
                                 @endif
                             </div>

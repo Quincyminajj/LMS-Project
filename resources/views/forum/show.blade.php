@@ -82,7 +82,7 @@
                             @endforelse
                         </div>
 
-                        <!-- Comment Form - DIPINDAH KE BAWAH -->
+                        <!-- Comment Form  -->
                         <div class="border-top pt-4">
                             <form id="commentForm" action="{{ route('forum-komentar.store') }}" method="POST">
                                 @csrf
