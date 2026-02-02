@@ -8,7 +8,7 @@
         <div class="col-lg-10">
             
             <!-- Timer & Info Header -->
-            <div class="card border-0 shadow-sm mb-4 sticky-top" style="top: 70px; z-index: 100;">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body py-3">
                     <div class="row align-items-center">
                         <div class="col-md-4">
@@ -101,24 +101,6 @@
                         </div>
                     </div>
                 @endforeach
-
-                <!-- Navigasi Soal (Sticky Bottom) -->
-                <div class="card border-0 shadow-lg sticky-bottom mb-0" style="bottom: 0;">
-                    <div class="card-body p-3">
-                        <div class="d-flex justify-content-between align-items-center flex-wrap">
-                            <div class="mb-2 mb-md-0">
-                                <small class="text-muted">Navigasi Soal</small>
-                                <div class="btn-group flex-wrap" role="group">
-                                    @foreach($soal as $index => $item)
-                                        <button type="button" 
-                                                class="btn btn-sm btn-outline-primary soal-nav-btn" 
-                                                data-soal="{{ $index + 1 }}"
-                                                onclick="scrollToSoal({{ $index + 1 }})">
-                                            {{ $index + 1 }}
-                                        </button>
-                                    @endforeach
-                                </div>
-                            </div>
                             
                             <button type="button" class="btn btn-success" onclick="confirmSubmit()">
                                 <i class="bi bi-send"></i> Submit Jawaban
@@ -307,6 +289,9 @@
     }
     
     function submitForm() {
+        // Nonaktifkan beforeunload sebelum submit
+        window.removeEventListener('beforeunload', preventLeave);
+        
         Swal.fire({
             title: 'Menyimpan Jawaban...',
             text: 'Mohon tunggu sebentar',
@@ -321,11 +306,13 @@
     }
     
     // Prevent accidental page leave
-    window.addEventListener('beforeunload', function (e) {
+    function preventLeave(e) {
         e.preventDefault();
         e.returnValue = '';
         return '';
-    });
+    }
+    
+    window.addEventListener('beforeunload', preventLeave);
     
     // Initialize nav buttons on load
     updateNavButtons();

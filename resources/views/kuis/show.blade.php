@@ -153,9 +153,21 @@
                                         @endif
                                     </td>
                                     <td class="text-center">
-                                        @if($attempt->nilai_akhir !== null)
-                                            <span class="badge bg-primary fs-6">
-                                                {{ $attempt->nilai_akhir }}
+                                        @if ($attempt->nilai_akhir !== null)
+                                            @php
+                                                $nilai = $attempt->nilai_akhir;
+
+                                                if ($nilai >= 80) {
+                                                    $badge = 'bg-success';   // Hijau
+                                                } elseif ($nilai >= 60) {
+                                                    $badge = 'bg-warning';   // Kuning
+                                                } else {
+                                                    $badge = 'bg-danger';    // Merah
+                                                }
+                                            @endphp
+
+                                            <span class="badge {{ $badge }} fs-6">
+                                                {{ $nilai }}
                                             </span>
                                         @else
                                             <span class="text-muted">-</span>

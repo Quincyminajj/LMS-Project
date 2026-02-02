@@ -7,7 +7,7 @@ use App\Models\Kuis;
 use App\Models\KuisAttempt;
 use App\Models\KuisSoal;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Barryvdh\DomPDF\Facade\Pdf as PDF;
 use Illuminate\Support\Facades\DB;
 
 class KuisController extends Controller
@@ -156,7 +156,7 @@ class KuisController extends Controller
             ->orderBy('mulai_pada')
             ->get();
 
-        $pdf = Pdf::loadView('kuis.pdf', [
+        $pdf = PDF::loadView('kuis.pdf', [
             'kuis'     => $kuis,
             'attempts' => $attempts
         ]);

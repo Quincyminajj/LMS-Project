@@ -136,14 +136,29 @@
                             @if (session('role') === 'siswa')
                                 @if ($sudahMengerjakan)
                                     @php
-                                        // Tentukan status berdasarkan nilai (standar KKM 70)
                                         $nilai = $attemptSiswa->nilai_akhir ?? 0;
-                                        $isLulus = $nilai >= 70;
-                                        $bgColor = $isLulus ? '#d4edda' : '#f8d7da';
-                                        $textColor = $isLulus ? 'text-success' : 'text-danger';
-                                        $icon = $isLulus ? 'bi-check-circle-fill' : 'bi-x-circle-fill';
-                                        $statusText = $isLulus ? 'Lulus' : 'Tidak Lulus';
+
+                                        if ($nilai >= 80) {
+                                            // Sangat Baik
+                                            $bgColor = '#d4edda';
+                                            $textColor = 'text-success';
+                                            $icon = 'bi bi-emoji-smile-fill';
+                                            $statusText = 'Kamu Sangat Mengagumkan!';
+                                        } elseif ($nilai >= 60) {
+                                            // Cukup
+                                            $bgColor = '#fff3cd';
+                                            $textColor = 'text-warning';
+                                            $icon = 'bi bi-emoji-neutral-fill';
+                                            $statusText = 'Hasilmu Cukup Baik, Tingkatkan Lagi!';
+                                        } else {
+                                            // Kurang
+                                            $bgColor = '#f8d7da';
+                                            $textColor = 'text-danger';
+                                            $icon = 'bi bi-emoji-frown-fill';
+                                            $statusText = 'Semangat, Belajar Lagi Ya!';
+                                        }
                                     @endphp
+
                                     
                                     <div class="card border-0 shadow-sm mb-2" style="background: linear-gradient(135deg, {{ $bgColor }} 0%, #ffffff 100%);">
                                         <div class="card-body p-3">
