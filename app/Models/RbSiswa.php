@@ -50,4 +50,16 @@ class RbSiswa extends Authenticatable
     {
         return $this->hasMany(TugasPengumpulan::class, 'siswa_nisn', 'nisn');
     }
+
+    // Relasi ke KuisAttempt
+    public function kuisAttempts()
+    {
+        return $this->hasMany(KuisAttempt::class, 'siswa_nisn', 'nisn');
+    }
+
+    // Accessor untuk kompatibilitas view
+    public function getNamaSiswaAttribute()
+    {
+        return $this->nama;
+    }
 }

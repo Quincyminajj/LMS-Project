@@ -42,6 +42,10 @@
                     <i class="bi bi-clipboard-check"></i> <span class="d-none d-sm-inline">Tugas</span>
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link px-2 px-md-3 small" href="{{ route('kuis.index', $kelas->id) }}">
+                    <i class="bi bi-patch-question"></i> <span class="d-none d-sm-inline">Kuis</span>
+                </a>
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->is('kelas/*/forum') ? 'active' : '' }}"

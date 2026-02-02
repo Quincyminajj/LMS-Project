@@ -35,6 +35,11 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link px-2 px-md-3 small" href="{{ route('kuis.index', $kelas->id) }}">
+                    <i class="bi bi-patch-question"></i> <span class="d-none d-sm-inline">Kuis</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link active px-2 px-md-3 small" href="{{ route('kelas.forum', $kelas->id) }}">
                     <i class="bi bi-chat-dots"></i> Forum</span>
                 </a>
