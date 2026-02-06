@@ -3,10 +3,10 @@
 @section('title', $tugas->judul)
 
 @section('content')
-    <div class="container py-4">
+    <div class="container-fluid py-4 px-4">
         <div class="row">
             <!-- Main Content -->
-            <div class="col-lg-8">
+            <div class="col-lg-{{ session('role') === 'guru' ? '12' : '8' }}">
                 <!-- Back Button -->
                 <a href="{{ route('tugas.index', $tugas->kelas_id) }}"
                     class="text-decoration-none text-secondary mb-3 d-inline-block">
@@ -220,185 +220,320 @@
                     </div>
                 @endif
 
-                <!-- Guru: Daftar Pengumpulan -->
+                <!-- Guru: Statistik & Daftar Pengumpulan -->
                 @if (session('role') === 'guru' && session('identifier') === $tugas->kelas->guru_nip)
-                    <div class="card shadow-sm border-0 mt-4">
+                    <!-- Card Statistik Pengumpulan -->
+                    <div class="card shadow-sm border-0 mt-4 mb-3">
                         <div class="card-body p-4">
-                            <h5 class="fw-bold mb-3">
-                                <i class="bi bi-people"></i> Daftar Pengumpulan
-                                <span class="badge bg-primary">{{ $tugas->pengumpulan->count() }}</span>
-                            </h5>
-
-                            @forelse($tugas->pengumpulan as $p)
-                                <div class="border rounded p-3 mb-3">
-                                    <div class="d-flex justify-content-between align-items-start mb-2">
-                                        <div>
-                                            <h6 class="fw-bold mb-1">{{ $p->siswa->nama ?? 'Siswa' }}</h6>
-                                            <small class="text-muted">
-                                                    NIPD: {{ $p->siswa->nipd ?? '-' }} •
-                                                    Dikumpulkan: {{ $p->created_at->format('d M Y, H:i') }}
-                                            </small>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
-                                            data-bs-target="#nilaiModal{{ $p->id }}">
-                                            <i class="bi bi-pencil"></i> Beri Nilai
-                                        </button>
+                            <h6 class="fw-bold mb-3">📊 Statistik Pengumpulan Tugas</h6>
+                            <div class="row g-3">
+                                <div class="col-md-2">
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-1">Total Pengumpulan</small>
+                                        <strong class="fs-4 text-primary">{{ $tugas->pengumpulan->count() }}</strong>
+                                        <small class="text-muted d-block">siswa</small>
                                     </div>
-
-                                    <div class="mt-2">
-                                        <strong>Jawaban:</strong>
-                                        <p class="mb-2">{{ Str::limit($p->jawaban, 200) }}</p>
-
-                                        @if ($p->file_path)
-                                            <a href="{{ asset('storage/' . $p->file_path) }}"
-                                                class="btn btn-sm btn-outline-secondary mb-2" download>
-                                                <i class="bi bi-download"></i> Download File
-                                            </a>
-                                            <a href="{{ route('preview.file', $p->file_path) }}"
-                                                class="btn btn-sm btn-outline-success mb-2" target="_blank">
-                                                <i class="bi bi-eye"></i> Lihat File
-                                            </a>
-                                        @endif
-
-                                        @if ($p->nilai)
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-1">Sudah Dinilai</small>
+                                        <strong class="fs-4 text-success">{{ $tugas->pengumpulan->whereNotNull('nilai')->count() }}</strong>
+                                        <small class="text-muted d-block">siswa</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-1">Belum Dinilai</small>
+                                        <strong class="fs-4 text-warning">{{ $tugas->pengumpulan->whereNull('nilai')->count() }}</strong>
+                                        <small class="text-muted d-block">siswa</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-1">Lulus KKM</small>
+                                        <strong class="fs-4 text-success">{{ $tugas->pengumpulan->where('nilai', '>=', $tugas->kkm)->count() }}</strong>
+                                        <small class="text-muted d-block">siswa</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-1">Belum Lulus KKM</small>
+                                        <strong class="fs-4 text-danger">{{ $tugas->pengumpulan->whereNotNull('nilai')->where('nilai', '<', $tugas->kkm)->count() }}</strong>
+                                        <small class="text-muted d-block">siswa</small>
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="text-center p-3 bg-light rounded">
+                                        <small class="text-muted d-block mb-1">Rata-rata Nilai</small>
+                                        <strong class="fs-4 text-info">
                                             @php
-                                                $isLulusKkm = $p->nilai >= $tugas->kkm;
+                                                $avgNilai = $tugas->pengumpulan->whereNotNull('nilai')->avg('nilai');
                                             @endphp
-                                            <div class="alert {{ $isLulusKkm ? 'alert-success' : 'alert-warning' }} py-2 mb-0 mt-2">
-                                                <div class="d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <strong>Nilai: {{ $p->nilai }}</strong>
-                                                        <span class="badge {{ $isLulusKkm ? 'bg-success' : 'bg-danger' }} ms-2">
-                                                            {{ $isLulusKkm ? '✓ Lulus KKM' : '✗ Belum Lulus' }}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                @if ($p->catatan_guru)
-                                                    <p class="mb-0 small mt-1">Catatan: {{ $p->catatan_guru }}</p>
-                                                @endif
-                                            </div>
-                                        @else
-                                            <div class="alert alert-warning py-2 mb-0 mt-2">
-                                                <i class="bi bi-hourglass-split"></i> Belum dinilai
-                                            </div>
-                                        @endif
+                                            {{ $avgNilai ? number_format($avgNilai, 1) : '-' }}
+                                        </strong>
+                                        <small class="text-muted d-block">{{ $avgNilai ? 'poin' : '' }}</small>
                                     </div>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                <!-- Modal Beri Nilai -->
-                                <div class="modal fade" id="nilaiModal{{ $p->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Beri Nilai -
-                                                    {{ $p->siswa->nama_siswa ?? 'Siswa' }}</h5>
-                                                <button type="button" class="btn-close"
-                                                    data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <form action="{{ route('tugaspengumpulan.update', $p->id) }}" method="POST">
-                                                @csrf @method('PUT')
-                                                <div class="modal-body">
-                                                    <div class="alert alert-info py-2">
-                                                        <small><i class="bi bi-info-circle"></i> <strong>KKM Tugas: {{ $tugas->kkm }}</strong></small>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Nilai *</label>
-                                                        <input type="number" name="nilai" class="form-control"
-                                                            value="{{ $p->nilai }}" min="0"
-                                                            max="{{ $tugas->nilai_maksimal }}" step="0.01" required>
-                                                        <small class="text-muted">Maksimal:
-                                                            {{ $tugas->nilai_maksimal }}</small>
-                                                    </div>
-                                                    <div class="mb-3">
-                                                        <label class="form-label">Catatan untuk Siswa</label>
-                                                        <textarea name="catatan_guru" class="form-control" rows="3" placeholder="Berikan feedback untuk siswa...">{{ $p->catatan_guru }}</textarea>
-                                                    </div>
-                                                </div>
-                                                <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary"
-                                                        data-bs-dismiss="modal">Batal</button>
-                                                    <button type="submit" class="btn btn-primary">Simpan Nilai</button>
-                                                </div>
-                                            </form>
-                                        </div>
+                    <!-- Tabel Daftar Pengumpulan -->
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="fw-bold mb-0">
+                                    <i class="bi bi-people"></i> Daftar Pengumpulan
+                                </h5>
+                                @if ($tugas->pengumpulan->count() > 0)
+                                    <div class="btn-group">
+                                        <a href="{{ route('tugas.export.pdf', ['kelas' => $tugas->kelas_id, 'tugas' => $tugas->id]) }}" 
+                                           class="btn btn-danger btn-sm">
+                                            <i class="bi bi-file-pdf"></i> Export PDF
+                                        </a>
+                                        <a href="{{ route('tugas.export.excel', ['kelas' => $tugas->kelas_id, 'tugas' => $tugas->id]) }}" 
+                                           class="btn btn-success btn-sm">
+                                            <i class="bi bi-file-excel"></i> Export Excel
+                                        </a>
                                     </div>
-                                </div>
+                                @endif
+                            </div>
 
-                            @empty
-                                <div class="text-center py-4 text-muted">
+                            @if($tugas->pengumpulan->count() > 0)
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th style="width: 5%;">No</th>
+                                                <th style="width: 15%;">Nama Siswa</th>
+                                                <th style="width: 10%;">NIPD</th>
+                                                <th style="width: 25%;">Jawaban</th>
+                                                <th style="width: 10%;">File</th>
+                                                <th style="width: 12%;">Waktu Kumpul</th>
+                                                <th style="width: 10%;">Nilai</th>
+                                                <th style="width: 13%;" class="text-center">Aksi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach($tugas->pengumpulan as $index => $p)
+                                                <tr>
+                                                    <td>{{ $index + 1 }}</td>
+                                                    <td>
+                                                        <strong>{{ $p->siswa->nama ?? 'Siswa' }}</strong>
+                                                    </td>
+                                                    <td>{{ $p->siswa->nipd ?? '-' }}</td>
+                                                    <td>
+                                                        <div class="text-truncate" style="max-width: 250px;" 
+                                                             data-bs-toggle="tooltip" 
+                                                             title="{{ $p->jawaban }}">
+                                                            {{ Str::limit($p->jawaban, 80) }}
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        @if ($p->file_path)
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a href="{{ asset('storage/' . $p->file_path) }}"
+                                                                   class="btn btn-outline-secondary" 
+                                                                   data-bs-toggle="tooltip" 
+                                                                   title="Download File"
+                                                                   download>
+                                                                    <i class="bi bi-download"></i>
+                                                                </a>
+                                                                <a href="{{ route('preview.file', $p->file_path) }}"
+                                                                   class="btn btn-outline-success" 
+                                                                   data-bs-toggle="tooltip" 
+                                                                   title="Lihat File"
+                                                                   target="_blank">
+                                                                    <i class="bi bi-eye"></i>
+                                                                </a>
+                                                            </div>
+                                                        @else
+                                                            <span class="text-muted small">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        <small>{{ $p->created_at->format('d M Y') }}</small><br>
+                                                        <small class="text-muted">{{ $p->created_at->format('H:i') }}</small>
+                                                    </td>
+                                                    <td>
+                                                        @if ($p->nilai)
+                                                            @php
+                                                                $isLulusKkm = $p->nilai >= $tugas->kkm;
+                                                            @endphp
+                                                            <span class="badge {{ $isLulusKkm ? 'bg-success' : 'bg-danger' }}">
+                                                                {{ $p->nilai }}
+                                                            </span>
+                                                            @if($p->catatan_guru)
+                                                                <i class="bi bi-chat-left-text text-info ms-1" 
+                                                                   data-bs-toggle="tooltip" 
+                                                                   title="{{ $p->catatan_guru }}"></i>
+                                                            @endif
+                                                        @else
+                                                            <span class="badge bg-warning text-dark">
+                                                                <i class="bi bi-hourglass-split"></i> Belum
+                                                            </span>
+                                                        @endif
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button class="btn btn-sm btn-primary" 
+                                                                data-bs-toggle="modal"
+                                                                data-bs-target="#nilaiModal{{ $p->id }}">
+                                                            <i class="bi bi-pencil"></i> Nilai
+                                                        </button>
+                                                    </td>
+                                                </tr>
+
+                                                <!-- Modal Beri Nilai -->
+                                                <div class="modal fade" id="nilaiModal{{ $p->id }}" tabindex="-1">
+                                                    <div class="modal-dialog modal-lg">
+                                                        <div class="modal-content">
+                                                            <div class="modal-header">
+                                                                <h5 class="modal-title">
+                                                                    <i class="bi bi-award"></i> Beri Nilai - {{ $p->siswa->nama_siswa ?? 'Siswa' }}
+                                                                </h5>
+                                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                            </div>
+                                                            <form action="{{ route('tugaspengumpulan.update', $p->id) }}" method="POST">
+                                                                @csrf @method('PUT')
+                                                                <div class="modal-body">
+                                                                    <!-- Info Siswa -->
+                                                                    <div class="alert alert-light border">
+                                                                        <div class="row">
+                                                                            <div class="col-md-6">
+                                                                                <small class="text-muted">NIPD:</small>
+                                                                                <strong class="d-block">{{ $p->siswa->nipd ?? '-' }}</strong>
+                                                                            </div>
+                                                                            <div class="col-md-6">
+                                                                                <small class="text-muted">Waktu Pengumpulan:</small>
+                                                                                <strong class="d-block">{{ $p->created_at->format('d M Y, H:i') }}</strong>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Jawaban Siswa -->
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label fw-bold">Jawaban Siswa:</label>
+                                                                        <div class="p-3 bg-light rounded" style="max-height: 200px; overflow-y: auto;">
+                                                                            {{ $p->jawaban }}
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- File Lampiran -->
+                                                                    @if ($p->file_path)
+                                                                        <div class="mb-3">
+                                                                            <label class="form-label fw-bold">File Lampiran:</label>
+                                                                            <div>
+                                                                                <a href="{{ asset('storage/' . $p->file_path) }}"
+                                                                                   class="btn btn-sm btn-outline-secondary" download>
+                                                                                    <i class="bi bi-download"></i> Download File
+                                                                                </a>
+                                                                                <a href="{{ route('preview.file', $p->file_path) }}"
+                                                                                   class="btn btn-sm btn-outline-success" target="_blank">
+                                                                                    <i class="bi bi-eye"></i> Lihat File
+                                                                                </a>
+                                                                            </div>
+                                                                        </div>
+                                                                    @endif
+
+                                                                    <hr>
+
+                                                                    <!-- Info KKM -->
+                                                                    <div class="alert alert-info py-2 mb-3">
+                                                                        <small>
+                                                                            <i class="bi bi-info-circle"></i> 
+                                                                            <strong>KKM Tugas: {{ $tugas->kkm }}</strong> | 
+                                                                            Nilai Maksimal: {{ $tugas->nilai_maksimal }}
+                                                                        </small>
+                                                                    </div>
+
+                                                                    <!-- Input Nilai -->
+                                                                    <div class="row">
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <label class="form-label fw-bold">Nilai *</label>
+                                                                            <input type="number" name="nilai" class="form-control form-control-lg"
+                                                                                   value="{{ $p->nilai }}" min="0"
+                                                                                   max="{{ $tugas->nilai_maksimal }}" step="0.01" required>
+                                                                        </div>
+                                                                        <div class="col-md-6 mb-3">
+                                                                            <label class="form-label fw-bold">Status KKM</label>
+                                                                            <div class="form-control form-control-lg text-center" style="background-color: #f8f9fa;">
+                                                                                @if($p->nilai)
+                                                                                    @if($p->nilai >= $tugas->kkm)
+                                                                                        <span class="badge bg-success fs-6">✓ Lulus KKM</span>
+                                                                                    @else
+                                                                                        <span class="badge bg-danger fs-6">✗ Belum Lulus</span>
+                                                                                    @endif
+                                                                                @else
+                                                                                    <span class="text-muted">-</span>
+                                                                                @endif
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <!-- Catatan Guru -->
+                                                                    <div class="mb-3">
+                                                                        <label class="form-label fw-bold">Catatan untuk Siswa</label>
+                                                                        <textarea name="catatan_guru" class="form-control" rows="4" 
+                                                                                  placeholder="Berikan feedback atau catatan untuk siswa...">{{ $p->catatan_guru }}</textarea>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                                                        <i class="bi bi-x-circle"></i> Batal
+                                                                    </button>
+                                                                    <button type="submit" class="btn btn-primary">
+                                                                        <i class="bi bi-check-circle"></i> Simpan Nilai
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <div class="text-center py-5 text-muted">
                                     <i class="bi bi-inbox fs-1"></i>
                                     <p class="mt-2">Belum ada siswa yang mengumpulkan tugas</p>
                                 </div>
-                            @endforelse
+                            @endif
                         </div>
                     </div>
                 @endif
             </div>
 
-            <!-- Sidebar -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
-                    <div class="card-body">
-                        <h6 class="fw-bold mb-3">Informasi Kelas</h6>
+            <!-- Sidebar (Hanya untuk Siswa) -->
+            @if (session('role') === 'siswa')
+                <div class="col-lg-4">
+                    <div class="card shadow-sm border-0 sticky-top" style="top: 20px;">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">Informasi Kelas</h6>
 
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Nama Kelas</small>
-                            <strong>{{ $tugas->kelas->nama_kelas }}</strong>
-                        </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Nama Kelas</small>
+                                <strong>{{ $tugas->kelas->nama_kelas }}</strong>
+                            </div>
 
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Kode Kelas</small>
-                            <strong>{{ $tugas->kelas->kode_kelas }}</strong>
-                        </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Kode Kelas</small>
+                                <strong>{{ $tugas->kelas->kode_kelas }}</strong>
+                            </div>
 
-                        <div class="mb-3">
-                            <small class="text-muted d-block">Guru Pengajar</small>
-                            <strong>{{ $tugas->kelas->guru->nama_guru ?? '-' }}</strong>
-                        </div>
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Guru Pengajar</small>
+                                <strong>{{ $tugas->kelas->guru->nama_guru ?? '-' }}</strong>
+                            </div>
 
-                        @if (session('role') === 'guru')
                             <hr>
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Total Pengumpulan</small>
-                                <strong class="fs-4">{{ $tugas->pengumpulan->count() }}</strong> siswa
-                            </div>
-
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Sudah Dinilai</small>
-                                <strong
-                                    class="fs-4 text-success">{{ $tugas->pengumpulan->whereNotNull('nilai')->count() }}</strong>
-                                siswa
-                            </div>
-
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Belum Dinilai</small>
-                                <strong
-                                    class="fs-4 text-warning">{{ $tugas->pengumpulan->whereNull('nilai')->count() }}</strong>
-                                siswa
-                            </div>
-
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Lulus KKM</small>
-                                <strong class="fs-4 text-success">
-                                    {{ $tugas->pengumpulan->where('nilai', '>=', $tugas->kkm)->count() }}
-                                </strong> siswa
-                            </div>
-
-                            <div class="mb-3">
-                                <small class="text-muted d-block">Belum Lulus KKM</small>
-                                <strong class="fs-4 text-danger">
-                                    {{ $tugas->pengumpulan->whereNotNull('nilai')->where('nilai', '<', $tugas->kkm)->count() }}
-                                </strong> siswa
-                            </div>
-                        @endif
-
-                        <hr>
-                        <a href="{{ route('tugas.index', $tugas->kelas_id) }}" class="btn btn-outline-primary w-100">
-                            <i class="bi bi-list"></i> Lihat Semua Tugas
-                        </a>
+                            <a href="{{ route('tugas.index', $tugas->kelas_id) }}" class="btn btn-outline-primary w-100">
+                                <i class="bi bi-list"></i> Lihat Semua Tugas
+                            </a>
+                        </div>
                     </div>
                 </div>
-            </div>
+            @endif
         </div>
     </div>
 
@@ -470,5 +605,13 @@
                 }
             })
         }
+
+        // Inisialisasi Bootstrap tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
     </script>
 @endsection

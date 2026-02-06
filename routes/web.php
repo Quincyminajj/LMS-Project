@@ -68,6 +68,8 @@ Route::middleware('auth.custom')->group(function () {
     Route::get('/tugas/{id}', [TugasController::class, 'show'])->name('tugas.show');
     Route::put('/kelas/{kelas}/tugas/{tugas}', [TugasController::class, 'update'])->name('tugas.update');
     Route::delete('/kelas/{kelas}/tugas/{tugas}', [TugasController::class, 'destroy'])->name('tugas.destroy');
+    Route::get('/kelas/{kelas}/tugas/{tugas}/export-pdf', [TugasPengumpulanController::class, 'exportPdf'])->name('tugas.export.pdf');
+    Route::get('/kelas/{kelas}/tugas/{tugas}/export-excel', [TugasPengumpulanController::class, 'exportExcel'])->name('tugas.export.excel');
 
     // Tugas Pengumpulan (Siswa)
     Route::post('/tugas/{tugas_id}/submit', [TugasPengumpulanController::class, 'store'])->name('tugas.submit');

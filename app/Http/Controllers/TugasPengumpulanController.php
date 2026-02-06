@@ -6,6 +6,9 @@ use App\Models\TugasPengumpulan;
 use App\Models\Tugas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\TugasPengumpulanExport;
 
 class TugasPengumpulanController extends Controller
 {
@@ -50,7 +53,7 @@ class TugasPengumpulanController extends Controller
 
         // Cek apakah siswa sudah mengumpulkan
         $existingPengumpulan = TugasPengumpulan::where('tugas_id', $validated['tugas_id'])
-            ->where('siswa_nisn', session('identifier'))  // ✅ PERBAIKI: Ubah dari siswa_nis ke siswa_nisn
+            ->where('siswa_nisn', session('identifier'))
             ->first();
 
         if ($existingPengumpulan) {
@@ -114,5 +117,69 @@ class TugasPengumpulanController extends Controller
 
         return redirect()->route('tugas.show', $tugas_id)
             ->with('success', 'Pengumpulan berhasil dihapus');
+    }
+
+    /**
+     * Export laporan pengumpulan tugas ke PDF
+     */
+    public function exportPdf($kelas_id, $tugas_id)
+    {
+        // Validasi akses guru
+        if (session('role') !== 'guru') {
+            abort(403, 'Akses ditolak. Hanya guru yang dapat mengakses fitur ini.');
+        }
+
+        // Load data tugas dengan relasi
+        $tugas = Tugas::with(['kelas.guru', 'pengumpulan.siswa'])
+            ->where('id', $tugas_id)
+            ->where('kelas_id', $kelas_id)
+            ->firstOrFail();
+
+        // Validasi guru yang mengajar kelas ini
+        if (session('identifier') !== $tugas->kelas->guru_nip) {
+            abort(403, 'Anda tidak memiliki akses ke tugas ini.');
+        }
+
+        // Generate PDF
+        $pdf = Pdf::loadView('tugas.pdf_export', compact('tugas'))
+            ->setPaper('a4', 'landscape')
+            ->setOption('margin-top', 10)
+            ->setOption('margin-bottom', 10)
+            ->setOption('margin-left', 10)
+            ->setOption('margin-right', 10);
+
+        // Generate filename
+        $filename = 'Laporan_Pengumpulan_' . str_replace(' ', '_', $tugas->judul) . '_' . date('Ymd_His') . '.pdf';
+
+        // Return PDF untuk di-download
+        return $pdf->download($filename);
+    }
+
+    /**
+     * Export laporan pengumpulan tugas ke Excel
+     */
+    public function exportExcel($kelas_id, $tugas_id)
+    {
+        // Validasi akses guru
+        if (session('role') !== 'guru') {
+            abort(403, 'Akses ditolak. Hanya guru yang dapat mengakses fitur ini.');
+        }
+
+        // Load data tugas
+        $tugas = Tugas::with(['kelas.guru', 'pengumpulan.siswa'])
+            ->where('id', $tugas_id)
+            ->where('kelas_id', $kelas_id)
+            ->firstOrFail();
+
+        // Validasi guru yang mengajar kelas ini
+        if (session('identifier') !== $tugas->kelas->guru_nip) {
+            abort(403, 'Anda tidak memiliki akses ke tugas ini.');
+        }
+
+        // Generate filename
+        $filename = 'Laporan_Pengumpulan_' . str_replace(' ', '_', $tugas->judul) . '_' . date('Ymd_His') . '.xlsx';
+
+        // Export ke Excel
+        return Excel::download(new TugasPengumpulanExport($tugas), $filename);
     }
 }
